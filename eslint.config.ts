@@ -23,6 +23,15 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
 
   {
+    name: 'app/pages-single-word-names',
+    files: ['src/pages/**/*.vue'],
+    rules: {
+      // Readme.md のプロジェクト構成で Contents1〜5 という単語1つのページ名が指定されている
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
+  {
     ...pluginPlaywright.configs['flat/recommended'],
     files: ['e2e/**/*.{test,spec}.{js,ts,jsx,tsx}'],
   },
