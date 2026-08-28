@@ -13,12 +13,11 @@ export interface MarkerDefinition {
 }
 
 export const MARKERS: MarkerDefinition[] = [
-  // サンプル: 8th Wall 公式サンプルのターゲット（動作確認用）。実運用では差し替える。
-  { name: 'model-target', title: '会式一号機', contentId: 1 },
-  { name: 'marker2', title: 'アンリ・ファルマン機', contentId: 2 },
-  { name: 'marker3', title: '九一式戦闘機', contentId: 3 },
-  { name: 'marker4', title: 'C-46A輸送機', contentId: 4 },
-  { name: 'marker5', title: '航空発祥の地・所沢', contentId: 5 },
+  { name: 'marker_1', title: '会式一号機', contentId: 1 },
+  { name: 'marker_2', title: 'プロペラ機', contentId: 2 },
+  { name: 'marker_3', title: 'ジェットエンジン', contentId: 3 },
+  { name: 'marker_4', title: 'ダグラス DC-3', contentId: 4 },
+  { name: 'marker_5', title: 'ヘリコプター', contentId: 5 },
 ]
 
 export function findMarkerByName(name: string): MarkerDefinition | undefined {

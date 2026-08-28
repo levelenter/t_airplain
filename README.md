@@ -54,8 +54,8 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-- 動作確認: メニュー →「スタート」→ カメラ許可 → `public/image-targets/model-target_original.jpg`
-  を別画面に表示してかざすと Contents1（会式一号機）が表示される
+- 動作確認: メニュー →「スタート」→ カメラ許可 → `public/marker/marker_1.png` 〜 `marker_5.png`
+  を別画面に表示（または印刷）してかざすと、対応する Contents1〜5 が表示される
 - 実機（スマホ）確認はカメラ利用のため HTTPS が必須。`npm run dev -- --host` で LAN 公開した上で
   ngrok 等でトンネルするのが簡単: `ngrok http 5173`
 - 画像マーカーの追加方法は `public/image-targets/README.md` を参照

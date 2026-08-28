@@ -20,7 +20,6 @@ GUI で作成したい場合は 8th Wall Desktop アプリ（https://8thwall.org
 
 ## 現在のファイル
 
-- `model-target.json` — 8th Wall 公式サンプル（クラゲのフライヤー）の動作確認用ターゲット。
-  `model-target_original.jpg` を別の画面に表示（または印刷）してカメラをかざすと認識されます。
-  実運用時は記念館のマーカー画像に差し替えてください。
-- `marker2.json` 〜 `marker5.json` は未生成です。上記の手順で生成して追加してください。
+`public/marker/marker_1.png` 〜 `marker_5.png` から生成した `marker_1.json` 〜 `marker_5.json`
+（および crop / luminance / thumbnail 画像）を登録済みです。
+元画像を差し替えた場合は、上記 CLI で再生成してこのディレクトリを更新してください。

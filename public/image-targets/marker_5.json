@@ -1,0 +1,23 @@
+{
+  "imagePath": "image-targets/marker_5_luminance.png",
+  "metadata": null,
+  "name": "marker_5",
+  "type": "PLANAR",
+  "properties": {
+    "left": 256,
+    "top": 0,
+    "width": 1536,
+    "height": 2048,
+    "isRotated": true,
+    "originalWidth": 2048,
+    "originalHeight": 2048
+  },
+  "resources": {
+    "originalImage": "marker_5_original.png",
+    "croppedImage": "marker_5_cropped.png",
+    "thumbnailImage": "marker_5_thumbnail.png",
+    "luminanceImage": "marker_5_luminance.png"
+  },
+  "created": 1787896156093,
+  "updated": 1787896156093
+}

@@ -1,31 +1,23 @@
 <script setup lang="ts">
-// コンテンツ5: 航空発祥の地・所沢 — 記念パネルと浮遊する星
+// コンテンツ5: ヘリコプター — /3dmodels/chopper.glb を表示
+// モデル実寸は約 1260 単位。原点がやや下寄りのため少し持ち上げる
 defineProps<{ markerName: string }>()
 </script>
 
 <template>
   <xrextras-named-image-target :name="markerName">
-    <a-entity>
-      <a-plane position="0 0.3 0" width="0.9" height="0.5" color="#0b1e3f" opacity="0.85"></a-plane>
-      <a-text
-        value="Tokorozawa\nBirthplace of Japanese Aviation\n1911 -"
-        position="0 0.3 0.01"
-        align="center"
-        color="#ffd54f"
-        width="1.6"
-      ></a-text>
-      <a-sphere
-        position="-0.55 0.5 0.1"
-        radius="0.04"
-        color="#ffd54f"
-        animation="property: position; from: -0.55 0.5 0.1; to: -0.55 0.65 0.1; dir: alternate; dur: 1200; easing: easeInOutSine; loop: true"
-      ></a-sphere>
-      <a-sphere
-        position="0.55 0.55 0.1"
-        radius="0.04"
-        color="#ffffff"
-        animation="property: position; from: 0.55 0.55 0.1; to: 0.55 0.4 0.1; dir: alternate; dur: 1500; easing: easeInOutSine; loop: true"
-      ></a-sphere>
-    </a-entity>
+    <a-entity
+      gltf-model="url(/3dmodels/chopper.glb)"
+      scale="0.0008 0.0008 0.0008"
+      position="0 0.15 0"
+      animation="property: rotation; to: 0 360 0; dur: 12000; easing: linear; loop: true"
+    ></a-entity>
+    <a-text
+      value="Helicopter"
+      position="0 0.7 0"
+      align="center"
+      color="#ffffff"
+      width="2.4"
+    ></a-text>
   </xrextras-named-image-target>
 </template>

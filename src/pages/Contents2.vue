@@ -1,26 +1,23 @@
 <script setup lang="ts">
-// コンテンツ2: アンリ・ファルマン機 — 回転するリングと球体のディスプレイ
+// コンテンツ2: プロペラ機 — /3dmodels/plane.glb を表示
+// モデル実寸は約 1260 単位のため、マーカー空間（約1単位）に収まるよう scale で縮小する
 defineProps<{ markerName: string }>()
 </script>
 
 <template>
   <xrextras-named-image-target :name="markerName">
-    <a-entity position="0 0.3 0">
-      <a-sphere radius="0.18" color="#2e6da4" metalness="0.3" roughness="0.4"></a-sphere>
-      <a-torus
-        radius="0.32"
-        radius-tubular="0.015"
-        color="#ffd54f"
-        rotation="90 0 0"
-        animation="property: rotation; to: 90 360 0; dur: 4000; easing: linear; loop: true"
-      ></a-torus>
-      <a-text
-        value="Henri Farman"
-        position="0 0.45 0"
-        align="center"
-        color="#ffffff"
-        width="2.4"
-      ></a-text>
-    </a-entity>
+    <a-entity
+      gltf-model="url(/3dmodels/plane.glb)"
+      scale="0.0008 0.0008 0.0008"
+      position="0 0.1 0"
+      animation="property: rotation; to: 0 360 0; dur: 12000; easing: linear; loop: true"
+    ></a-entity>
+    <a-text
+      value="Airplane"
+      position="0 0.7 0"
+      align="center"
+      color="#ffffff"
+      width="2.4"
+    ></a-text>
   </xrextras-named-image-target>
 </template>
