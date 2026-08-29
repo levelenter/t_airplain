@@ -7,6 +7,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // アプリをドメイン直下ではなく /ar 配下で動作させる
+  base: '/ar/',
   plugins: [
     vue({
       template: {

@@ -2,12 +2,14 @@
 // コンテンツ3: ジェットエンジン — /3dmodels/jet_engine.glb を表示
 // モデル実寸は約 13 単位（幅方向）
 defineProps<{ markerName: string }>()
+
+const modelUrl = `${import.meta.env.BASE_URL}3dmodels/jet_engine.glb`
 </script>
 
 <template>
   <xrextras-named-image-target :name="markerName">
     <a-entity
-      gltf-model="url(/3dmodels/jet_engine.glb)"
+      :gltf-model="`url(${modelUrl})`"
       scale="0.07 0.07 0.07"
       position="0 0.1 0"
       animation="property: rotation; to: 0 360 0; dur: 12000; easing: linear; loop: true"
