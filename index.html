@@ -5,7 +5,22 @@
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- 非対応端末（PC等）でのフォールバック QR に表示するリンク先。未指定だと現在の URL（/camera 等）になる -->
+    <meta name="8thwall:shortlink" content="https://demo.blockvrock.com/ar/">
     <title>所沢航空発祥記念館 WebAR</title>
+
+    <!--
+      @8thwall/landing-page の CSS は .landing8-logo-section に margin:0 auto を当てつつ、
+      画面幅 768px 以上では margin-right:0 で打ち消している。
+      その結果 margin-left だけが auto となり、powered by 8thWall のロゴが右に寄ってしまうため、
+      左右とも auto に戻して中央寄せにする
+    -->
+    <style>
+      .landing8-logo-section {
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+    </style>
 
     <!-- 8-Frame: 8th Wall が調整した A-Frame 1.5.0（OSS）。a-scene より先に同期読み込みする -->
     <script src="/scripts/8frame-1.5.0.min.js"></script>

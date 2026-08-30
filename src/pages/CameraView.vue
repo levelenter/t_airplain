@@ -31,9 +31,25 @@ function handleImageLost(event: Event) {
   arStore.onImageLost((event as CustomEvent<ImageTargetEventDetail>).detail.name)
 }
 
+/**
+ * 非対応端末向け QR 画面の末尾に出る "to continue" を消す。
+ *
+ * A-Frame はプロパティ値が空文字のときスキーマの default に差し戻す仕様のため、
+ * landing-page="promptSuffix: " や setAttribute(..., '') では空にできない。
+ * そこでスキーマの default 自体を空文字に書き換える（a-scene 生成前に実行すること）。
+ */
+function clearLandingPagePromptSuffix() {
+  const schema = window.AFRAME?.components?.['landing-page']?.schema
+  if (schema?.promptSuffix) {
+    schema.promptSuffix.default = ''
+  }
+}
+
 onMounted(async () => {
   arStore.reset()
   arStore.loadedMarkerNames = await configureImageTargets(MARKERS.map((m) => m.name))
+
+  clearLandingPagePromptSuffix()
   ready.value = true
 
   // a-scene は v-if でこの後に挿入されるため、イベントは次フレームで購読する
@@ -64,7 +80,7 @@ function goBack() {
       v-if="ready"
       ref="scene"
       xrweb
-      landing-page
+      landing-page="promptPrefix: QRをスキャンしてスマートフォンなどで表示してください"
       xrextras-loading
       xrextras-runtime-error
       xrextras-gesture-detector

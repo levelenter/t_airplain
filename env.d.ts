@@ -14,9 +14,19 @@ declare global {
     [key: string]: unknown
   }
 
+  /** A-Frame（8frame）が公開するグローバル。登録済みコンポーネントのスキーマ参照に使う */
+  interface AFrameComponentDefinition {
+    schema?: Record<string, { default?: unknown }>
+  }
+
+  interface AFrameGlobal {
+    components: Record<string, AFrameComponentDefinition | undefined>
+  }
+
   interface Window {
     XR8?: XR8Global
     XRExtras?: Record<string, unknown>
+    AFRAME?: AFrameGlobal
   }
 }
 
