@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { MARKERS } from '@/utils/markers'
+import { unlockAudio } from '@/utils/sound'
 
 const router = useRouter()
 
 function start() {
+  // iOS では音の再生開始にユーザー操作が必要なため、遷移前にここで解除しておく
+  unlockAudio()
   router.push({ name: 'camera' })
 }
 </script>

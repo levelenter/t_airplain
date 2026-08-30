@@ -17,6 +17,7 @@
     "format": "oxfmt src/"
   },
   "dependencies": {
+    "howler": "^2.2.4",
     "pinia": "^4.0.2",
     "vue": "rc",
     "vue-router": "^5.2.0"
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@tsconfig/node24": "^24.0.4",
+    "@types/howler": "^2.2.13",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^24.13.3",
     "@vitejs/plugin-vue": "^6.0.8",

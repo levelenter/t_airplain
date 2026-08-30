@@ -1,50 +1,134 @@
 /**
- * UI 効果音。音源ファイルを持たずに済むよう Web Audio API で合成する。
+ * 効果音まわり。再生は howler.js に任せる。
  *
- * AudioContext はユーザー操作（タップ）のハンドラ内で生成・再開する必要がある。
- * iOS Safari は初回操作まで suspended のままなので、再生のたびに resume を試みる。
+ * - タップ音・マーカー発見音: public/sound/ の音源を Howl で再生する
+ *   （生成時にプリロードされるため、初回再生でも音が遅れない）
+ * - 探索中のソナー音: 音源を持たないので Web Audio で合成する。
+ *   howler が持つ AudioContext に相乗りさせ、音量管理を masterGain に揃える。
+ *
+ * iOS / Android の自動再生制限は howler の autoUnlock が処理するが、
+ * 確実を期してカメラ画面へ入る前（スタートボタン）に unlockAudio() を呼ぶ。
  */
 
-let audioContext: AudioContext | null = null
+import { Howl, Howler } from 'howler'
 
-function getAudioContext(): AudioContext | null {
-  if (typeof window === 'undefined') return null
+/** ソナーの ping 間隔 */
+const SONAR_INTERVAL_MS = 2600
+/** トラッキングのちらつきで同じ音が連打されるのを防ぐ最小間隔 */
+const REPLAY_GUARD_MS = 400
 
-  if (!audioContext) {
-    const AudioContextCtor = window.AudioContext ?? window.webkitAudioContext
-    if (!AudioContextCtor) return null
-    audioContext = new AudioContextCtor()
-  }
+/** マーカーをタップしてコンテンツを表示したとき */
+const tapSound = new Howl({
+  src: [`${import.meta.env.BASE_URL}sound/tap.mp3`],
+  volume: 0.9,
+})
 
-  return audioContext
-}
+/** マーカーを認識したとき */
+const foundSound = new Howl({
+  src: [`${import.meta.env.BASE_URL}sound/found.mp3`],
+  volume: 0.8,
+})
 
-/** マーカーをタップしてコンテンツを出したときの確認音（短い「コッ」） */
-export function playTapSound(): void {
-  const ctx = getAudioContext()
-  if (!ctx) return
+let sonarTimer: ReturnType<typeof setInterval> | null = null
+let sonarEcho: DelayNode | null = null
+const lastPlayedAt = new WeakMap<Howl, number>()
 
-  if (ctx.state === 'suspended') {
+/**
+ * AudioContext をユーザー操作の中で再開する。
+ * これを踏まないと iOS Safari では以降どの音も鳴らないことがある。
+ */
+export function unlockAudio(): void {
+  const ctx = Howler.ctx
+  if (ctx && ctx.state === 'suspended') {
     void ctx.resume()
   }
+}
 
+function play(sound: Howl): void {
+  unlockAudio()
+
+  const now = Date.now()
+  if (now - (lastPlayedAt.get(sound) ?? 0) < REPLAY_GUARD_MS) return
+  lastPlayedAt.set(sound, now)
+
+  sound.play()
+}
+
+/** マーカーをタップしてコンテンツを表示したときの音 */
+export function playTapSound(): void {
+  play(tapSound)
+}
+
+/** マーカーを認識したときの音 */
+export function playFoundSound(): void {
+  play(foundSound)
+}
+
+/** 水中の反響に見立てたディレイ。1 度だけ作って使い回す */
+function getSonarEcho(ctx: AudioContext, destination: AudioNode): DelayNode {
+  if (sonarEcho) return sonarEcho
+
+  const delay = ctx.createDelay(1)
+  delay.delayTime.value = 0.28
+
+  const feedback = ctx.createGain()
+  feedback.gain.value = 0.34
+
+  // 反響のたびに高域を削ることで、遠ざかっていく響きになる
+  const damping = ctx.createBiquadFilter()
+  damping.type = 'lowpass'
+  damping.frequency.value = 1600
+
+  delay.connect(damping)
+  damping.connect(feedback)
+  feedback.connect(delay)
+  delay.connect(destination)
+
+  sonarEcho = delay
+  return delay
+}
+
+function pingSonar(): void {
+  const ctx = Howler.ctx
+  // HTML5 Audio へフォールバックしている環境では合成音は鳴らせない
+  if (!ctx) return
+
+  const destination: AudioNode = Howler.masterGain ?? ctx.destination
   const now = ctx.currentTime
 
-  // 立ち上がりを一瞬にして短く減衰させる（クリック音にならないよう 0 は避ける）
+  const osc = ctx.createOscillator()
+  osc.type = 'sine'
+  // わずかに下降させると潜水艦のソナーらしい ping になる
+  osc.frequency.setValueAtTime(1180, now)
+  osc.frequency.exponentialRampToValueAtTime(920, now + 0.5)
+
+  // 繰り返し鳴るので、耳に刺さらないよう控えめな音量で長めに減衰させる
   const gain = ctx.createGain()
   gain.gain.setValueAtTime(0.0001, now)
-  gain.gain.exponentialRampToValueAtTime(0.22, now + 0.012)
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26)
-  gain.connect(ctx.destination)
+  gain.gain.exponentialRampToValueAtTime(0.1, now + 0.04)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9)
 
-  // 高音（アタック）と低音（芯）を重ねて硬すぎない確認音にする
-  for (const frequency of [1320, 880]) {
-    const osc = ctx.createOscillator()
-    osc.type = 'sine'
-    osc.frequency.setValueAtTime(frequency, now)
-    osc.frequency.exponentialRampToValueAtTime(frequency * 0.6, now + 0.22)
-    osc.connect(gain)
-    osc.start(now)
-    osc.stop(now + 0.28)
-  }
+  osc.connect(gain)
+  gain.connect(destination)
+  gain.connect(getSonarEcho(ctx, destination))
+
+  osc.start(now)
+  osc.stop(now + 1)
+}
+
+/** マーカー探索中のソナー音を鳴らし始める（多重起動しない） */
+export function startSonar(): void {
+  if (sonarTimer !== null) return
+
+  unlockAudio()
+  pingSonar()
+  sonarTimer = setInterval(pingSonar, SONAR_INTERVAL_MS)
+}
+
+/** ソナー音を止める（鳴っている残響は自然に減衰させる） */
+export function stopSonar(): void {
+  if (sonarTimer === null) return
+
+  clearInterval(sonarTimer)
+  sonarTimer = null
 }
