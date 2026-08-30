@@ -27,6 +27,8 @@ declare global {
     XR8?: XR8Global
     XRExtras?: Record<string, unknown>
     AFRAME?: AFrameGlobal
+    /** Safari 系の接頭辞付き AudioContext（src/utils/sound.ts で使用） */
+    webkitAudioContext?: typeof AudioContext
   }
 }
 

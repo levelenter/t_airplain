@@ -10,11 +10,36 @@ export const useArStore = defineStore('ar', () => {
   const lastFoundName = ref<string | null>(null)
   /** XR8 に登録できたマーカー名 */
   const loadedMarkerNames = ref<string[]>([])
+  /** タップ済みでコンテンツを表示してよいマーカー名 */
+  const activatedMarkerNames = ref<Set<string>>(new Set())
 
   const activeMarker = computed<MarkerDefinition | null>(() => {
     const name = [...visibleMarkerNames.value][0] ?? lastFoundName.value
     return name ? (findMarkerByName(name) ?? null) : null
   })
+
+  /**
+   * 認識中だがまだタップされていないマーカー。
+   * これが非 null の間は、コンテンツを出さずタップを促す表示を行う。
+   */
+  const pendingMarker = computed<MarkerDefinition | null>(() => {
+    for (const name of visibleMarkerNames.value) {
+      if (!activatedMarkerNames.value.has(name)) {
+        return findMarkerByName(name) ?? null
+      }
+    }
+    return null
+  })
+
+  /** そのマーカーのコンテンツを表示してよいか（= 一度タップされたか） */
+  function isActivated(name: string): boolean {
+    return activatedMarkerNames.value.has(name)
+  }
+
+  /** タップされたマーカーのコンテンツ表示を許可する */
+  function activate(name: string) {
+    activatedMarkerNames.value = new Set(activatedMarkerNames.value).add(name)
+  }
 
   function onImageFound(name: string) {
     visibleMarkerNames.value = new Set(visibleMarkerNames.value).add(name)
@@ -30,13 +55,18 @@ export const useArStore = defineStore('ar', () => {
   function reset() {
     visibleMarkerNames.value = new Set()
     lastFoundName.value = null
+    activatedMarkerNames.value = new Set()
   }
 
   return {
     visibleMarkerNames,
     lastFoundName,
     loadedMarkerNames,
+    activatedMarkerNames,
     activeMarker,
+    pendingMarker,
+    isActivated,
+    activate,
     onImageFound,
     onImageLost,
     reset,

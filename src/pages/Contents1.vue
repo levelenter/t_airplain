@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // コンテンツ1: 会式一号機（1911年・所沢で初飛行）— プリミティブで組んだ複葉機とプロペラ回転
-defineProps<{ markerName: string }>()
+// active はタップ後に true になる。モデルは常に構築しておき visible だけ切り替える
+defineProps<{ markerName: string; active: boolean }>()
 </script>
 
 <template>
   <xrextras-named-image-target :name="markerName">
-    <a-entity position="0 0.15 0" scale="0.5 0.5 0.5">
+    <a-entity position="0 0.15 0" scale="0.5 0.5 0.5" :visible="active ? 'true' : 'false'">
       <!-- 主翼（上下） -->
       <a-box position="0 0.35 0" width="1.6" height="0.03" depth="0.3" color="#d9c58f"></a-box>
       <a-box position="0 0 0" width="1.6" height="0.03" depth="0.3" color="#d9c58f"></a-box>
