@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
+import TransformPanel from '@/components/TransformPanel.vue'
+import { useDebugMode } from '@/composables/useDebugMode'
 import { useArStore } from '@/stores/ar'
+import { useContentTransformStore } from '@/stores/contentTransform'
+import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { MARKERS } from '@/utils/markers'
 import { playFoundSound, playTapSound } from '@/utils/sound'
 import { configureImageTargets, stopXR8 } from '@/utils/xr8'
@@ -15,6 +19,11 @@ const CONTENTS = { 1: Contents1, 2: Contents2, 3: Contents3, 4: Contents4, 5: Co
 
 const router = useRouter()
 const arStore = useArStore()
+const transformStore = useContentTransformStore()
+const isDebug = useDebugMode()
+
+/** 調整パネルの表示状態（?debug=true のときだけ開ける） */
+const panelOpen = ref(false)
 
 /** XR8 のロードと画像ターゲット登録が済んでからシーンをマウントする */
 const ready = ref(false)
@@ -52,6 +61,8 @@ onMounted(async () => {
   arStore.loadedMarkerNames = await configureImageTargets(MARKERS.map((m) => m.name))
 
   clearLandingPagePromptSuffix()
+  // 自動回転コンポーネントは a-scene 生成前に登録しておく必要がある
+  registerAutoSpin()
   ready.value = true
 
   // a-scene は v-if でこの後に挿入されるため、イベントは次フレームで購読する
@@ -68,7 +79,8 @@ onBeforeUnmount(() => {
 })
 
 function goBack() {
-  router.push({ name: 'start' })
+  // デバッグ中はメニューへ戻ってもモードを維持する
+  router.push({ name: 'start', query: isDebug.value ? { debug: 'true' } : {} })
 }
 
 /**
@@ -123,6 +135,7 @@ function handleTap() {
         :key="marker.name"
         :marker-name="marker.name"
         :active="arStore.isActivated(marker.name)"
+        :transform="transformStore.get(marker.contentId)"
       />
     </a-scene>
 
@@ -165,7 +178,28 @@ function handleTap() {
       <button class="camera__back" type="button" @click="goBack">← メニュー</button>
       <p v-if="arStore.activeMarker" class="camera__label">{{ arStore.activeMarker.title }}</p>
       <p v-else class="camera__label camera__label--hint">画像マーカーを探してかざしてください</p>
+
+      <button
+        v-if="isDebug && !panelOpen"
+        class="camera__debug-open"
+        type="button"
+        @click="panelOpen = true"
+      >
+        調整
+      </button>
     </header>
+
+    <!-- 配置調整パネル（?debug=true のときのみ）。対象は認識中のマーカーに追従する -->
+    <TransformPanel
+      v-if="isDebug && panelOpen && arStore.activeMarker"
+      :content-id="arStore.activeMarker.contentId"
+      :title="arStore.activeMarker.title"
+      @close="panelOpen = false"
+    />
+    <p v-else-if="isDebug && panelOpen" class="camera__debug-hint">
+      調整するマーカーを認識させてください
+      <button type="button" @click="panelOpen = false">×</button>
+    </p>
   </div>
 </template>
 
@@ -225,6 +259,51 @@ function handleTap() {
   color: #fff;
   font-weight: normal;
   background: rgb(0 0 0 / 55%);
+}
+
+/* デバッグ時のみ HUD に出る調整パネルの開閉ボタン */
+.camera__debug-open {
+  pointer-events: auto;
+  margin-left: auto;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  color: #0b1e3f;
+  font-weight: bold;
+  background: rgb(255 255 255 / 85%);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.camera__debug-hint {
+  position: fixed;
+  z-index: 20;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  color: #fff;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgb(10 14 20 / 72%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.camera__debug-hint button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: #fff;
+  background: rgb(255 255 255 / 12%);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 /* 全面タップレイヤー。見た目は持たせず、当たり判定だけを担う */

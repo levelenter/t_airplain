@@ -21,6 +21,7 @@ declare global {
 
   interface AFrameGlobal {
     components: Record<string, AFrameComponentDefinition | undefined>
+    registerComponent(name: string, definition: Record<string, unknown>): void
   }
 
   interface Window {

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useDebugMode, useDebugQuery } from '@/composables/useDebugMode'
 import { MARKERS } from '@/utils/markers'
 import { unlockAudio } from '@/utils/sound'
 
 const router = useRouter()
+const isDebug = useDebugMode()
+const debugQuery = useDebugQuery()
 
 function start() {
   // iOS では音の再生開始にユーザー操作が必要なため、遷移前にここで解除しておく
   unlockAudio()
-  router.push({ name: 'camera' })
+  // ?debug=true はカメラ画面まで引き継ぐ
+  router.push({ name: 'camera', query: debugQuery.value })
 }
 </script>
 
@@ -32,6 +36,7 @@ function start() {
       </section>
 
       <p class="start__note">※ カメラの使用許可が必要です</p>
+      <p v-if="isDebug" class="start__debug">配置調整モード（?debug=true）で動作中</p>
     </div>
   </main>
 </template>
@@ -112,5 +117,15 @@ function start() {
   margin-top: 20px;
   font-size: 0.8rem;
   opacity: 0.7;
+}
+
+.start__debug {
+  margin: 8px 0 0;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #0b1e3f;
+  background: #ffd54f;
+  border-radius: 999px;
 }
 </style>
