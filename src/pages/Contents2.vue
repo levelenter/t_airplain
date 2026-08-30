@@ -1,9 +1,9 @@
 <script setup lang="ts">
-// コンテンツ2: プロペラ機 — /3dmodels/plane.glb を表示
+// コンテンツ2: プロペラ機 — /3dmodels/model2_cessna.glb を表示
 // モデル実寸は約 1260 単位のため、マーカー空間（約1単位）に収まるよう scale で縮小する
 defineProps<{ markerName: string }>()
 
-const modelUrl = `${import.meta.env.BASE_URL}3dmodels/plane.glb`
+const modelUrl = `${import.meta.env.BASE_URL}3dmodels/model2_cessna.glb`
 </script>
 
 <template>

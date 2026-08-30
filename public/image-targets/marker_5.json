@@ -1,23 +1,23 @@
 {
-  "imagePath": "image-targets/marker_5_luminance.png",
+  "imagePath": "image-targets/marker_5_luminance.jpg",
   "metadata": null,
   "name": "marker_5",
   "type": "PLANAR",
   "properties": {
-    "left": 256,
-    "top": 0,
-    "width": 1536,
-    "height": 2048,
+    "left": 0,
+    "top": 160,
+    "width": 1200,
+    "height": 1600,
     "isRotated": true,
-    "originalWidth": 2048,
-    "originalHeight": 2048
+    "originalWidth": 1200,
+    "originalHeight": 1920
   },
   "resources": {
-    "originalImage": "marker_5_original.png",
-    "croppedImage": "marker_5_cropped.png",
-    "thumbnailImage": "marker_5_thumbnail.png",
-    "luminanceImage": "marker_5_luminance.png"
+    "originalImage": "marker_5_original.jpg",
+    "croppedImage": "marker_5_cropped.jpg",
+    "thumbnailImage": "marker_5_thumbnail.jpg",
+    "luminanceImage": "marker_5_luminance.jpg"
   },
-  "created": 1787896156093,
-  "updated": 1787896156093
+  "created": 1788056070137,
+  "updated": 1788056070137
 }

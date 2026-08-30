@@ -20,6 +20,13 @@ GUI で作成したい場合は 8th Wall Desktop アプリ（https://8thwall.org
 
 ## 現在のファイル
 
-`public/marker/marker_1.png` 〜 `marker_5.png` から生成した `marker_1.json` 〜 `marker_5.json`
+`public/marker/` 配下の以下の画像から生成した `marker_1.json` 〜 `marker_5.json`
 （および crop / luminance / thumbnail 画像）を登録済みです。
+
+- `marker1_dbouble.jpeg` → `marker_1`
+- `marker2_cessna.jpg` → `marker_2`
+- `marker3_jet.jpg` → `marker_3`
+- `marker4_douglas.jpg` → `marker_4`
+- `marker5_helico.jpg` → `marker_5`
+
 元画像を差し替えた場合は、上記 CLI で再生成してこのディレクトリを更新してください。

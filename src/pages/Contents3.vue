@@ -1,9 +1,9 @@
 <script setup lang="ts">
-// コンテンツ3: ジェットエンジン — /3dmodels/jet_engine.glb を表示
+// コンテンツ3: ジェットエンジン — /3dmodels/model3_jet.glb を表示
 // モデル実寸は約 13 単位（幅方向）
 defineProps<{ markerName: string }>()
 
-const modelUrl = `${import.meta.env.BASE_URL}3dmodels/jet_engine.glb`
+const modelUrl = `${import.meta.env.BASE_URL}3dmodels/model3_jet.glb`
 </script>
 
 <template>

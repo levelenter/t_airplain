@@ -1,9 +1,9 @@
 <script setup lang="ts">
-// コンテンツ5: ヘリコプター — /3dmodels/chopper.glb を表示
+// コンテンツ5: ヘリコプター — /3dmodels/model5_helico.glb を表示
 // モデル実寸は約 1260 単位。原点がやや下寄りのため少し持ち上げる
 defineProps<{ markerName: string }>()
 
-const modelUrl = `${import.meta.env.BASE_URL}3dmodels/chopper.glb`
+const modelUrl = `${import.meta.env.BASE_URL}3dmodels/model5_helico.glb`
 </script>
 
 <template>
