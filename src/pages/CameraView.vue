@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { useArStore } from '@/stores/ar'
 import { MARKERS } from '@/utils/markers'
-import { playFoundSound, playTapSound, startSonar, stopSonar } from '@/utils/sound'
+import { playFoundSound, playTapSound } from '@/utils/sound'
 import { configureImageTargets, stopXR8 } from '@/utils/xr8'
 import Contents1 from './Contents1.vue'
 import Contents2 from './Contents2.vue'
@@ -64,7 +64,6 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   sceneRef.value?.removeEventListener('xrimagefound', handleImageFound)
   sceneRef.value?.removeEventListener('xrimagelost', handleImageLost)
-  stopSonar()
   stopXR8()
 })
 
@@ -95,22 +94,6 @@ function handleTap() {
   playTapSound()
   arStore.activate(marker.name)
 }
-
-/**
- * ソナー音はマーカーを探している間だけ鳴らす。
- * 認識できたら止めることで、発見音・タップ音と重ならず「見つかった」ことも音で伝わる。
- */
-watch(
-  [ready, reticleState],
-  ([isReady, state]) => {
-    if (isReady && state === 'idle') {
-      startSonar()
-    } else {
-      stopSonar()
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>

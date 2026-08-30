@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// コンテンツ1: 会式一号機（1911年・所沢で初飛行）— プリミティブで組んだ複葉機とプロペラ回転
+// コンテンツ1: 複葉機 — プリミティブで組んだ機体とプロペラ回転
 // active はタップ後に true になる。モデルは常に構築しておき visible だけ切り替える
 defineProps<{ markerName: string; active: boolean }>()
 </script>
@@ -23,7 +23,7 @@ defineProps<{ markerName: string; active: boolean }>()
       </a-entity>
 
       <a-text
-        value="Kaishiki No.1 (1911)"
+        value="Biplane"
         position="0 0.75 0"
         align="center"
         color="#ffffff"
