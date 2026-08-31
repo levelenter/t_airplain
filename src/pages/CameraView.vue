@@ -6,6 +6,7 @@ import { useDebugMode } from '@/composables/useDebugMode'
 import { useArStore } from '@/stores/ar'
 import { useContentTransformStore } from '@/stores/contentTransform'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
+import { localize8thWallUi } from '@/utils/localize8thWallUi'
 import { MARKERS } from '@/utils/markers'
 import { playFoundSound, playTapSound } from '@/utils/sound'
 import { configureImageTargets, stopXR8 } from '@/utils/xr8'
@@ -43,24 +44,38 @@ function handleImageLost(event: Event) {
 }
 
 /**
- * 非対応端末向け QR 画面の末尾に出る "to continue" を消す。
+ * 非対応端末向け QR 画面の設定。a-scene 生成前に実行すること。
  *
  * A-Frame はプロパティ値が空文字のときスキーマの default に差し戻す仕様のため、
  * landing-page="promptSuffix: " や setAttribute(..., '') では空にできない。
- * そこでスキーマの default 自体を空文字に書き換える（a-scene 生成前に実行すること）。
+ * そこでスキーマの default 自体を書き換える。
  */
-function clearLandingPagePromptSuffix() {
+function configureLandingPage() {
   const schema = window.AFRAME?.components?.['landing-page']?.schema
-  if (schema?.promptSuffix) {
+  if (!schema) return
+
+  // 末尾に出る "to continue" を消す
+  if (schema.promptSuffix) {
     schema.promptSuffix.default = ''
+  }
+
+  // QR のリンク先。未指定だと現在の URL（/camera）になるため、
+  // いま開いているホストのトップ（/ar/）を指すよう実行時に組み立てる
+  if (schema.url) {
+    schema.url.default = `${window.location.origin}${import.meta.env.BASE_URL}`
   }
 }
 
+/** 8th Wall の英語 UI 日本語化を止める関数（onMounted で受け取る） */
+let stopLocalize: (() => void) | null = null
+
 onMounted(async () => {
   arStore.reset()
+  // 許可ダイアログより先に監視を始める
+  stopLocalize = localize8thWallUi()
   arStore.loadedMarkerNames = await configureImageTargets(MARKERS.map((m) => m.name))
 
-  clearLandingPagePromptSuffix()
+  configureLandingPage()
   // 自動回転コンポーネントは a-scene 生成前に登録しておく必要がある
   registerAutoSpin()
   ready.value = true
@@ -75,6 +90,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   sceneRef.value?.removeEventListener('xrimagefound', handleImageFound)
   sceneRef.value?.removeEventListener('xrimagelost', handleImageLost)
+  stopLocalize?.()
   stopXR8()
 })
 
