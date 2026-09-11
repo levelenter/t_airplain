@@ -29,7 +29,7 @@ src/
     StartView.vue
     CameraView.vue
     Contents1.vue （複葉機）プリミティブなオブジェクトを配置して飛行機を作成
-    Contents2.vue /public/3dmodels/model2_cessna.glb（セスナ）
+    Contents2.vue /public/3dmodels/model2_t6g_wing_ar.glb（T-6G 主翼のひみつ：翼断面・気流・揚力・上反角）
     Contents3.vue /public/3dmodels/model3_jet.glb（ジェットエンジン）
     Contents4.vue /public/3dmodels/model4_C1_set.glb（C-1輸送機）
     Contents5.vue /public/3dmodels/model5_helico.glb（ヘリコプター）
@@ -103,3 +103,11 @@ npm run build
 JSON の項目が欠けていたり値が壊れている場合は、その項目だけ
 `src/utils/contentTransform.ts` の既定値に自動でフォールバックするため、
 一部だけ差し替えた JSON でも安全に読み込める。
+### AR2：T-6G 主翼のひみつ
+
+`marker_2`を認識してタップすると、翼断面と上反角の説明用GLBを表示します。
+飛行機全体は含みません。青・赤の気流は内蔵クリップ `Airflow_Loop_4s` を4秒周期で再生します。
+表示倍率は0.18、自動回転は無効です。`gltf-animation`はA-Frameの描画ループで更新し、
+非表示中は更新を止め、コンポーネント削除時にはミキサーを解放します。
+形状・角度・気流は説明用の模式表現です。実機では `?debug=true` の調整パネルで
+マーカーに対する位置・向き・倍率を調整してください。

@@ -31,7 +31,7 @@ export const CONTENT_IDS: readonly ContentId[] = [1, 2, 3, 4, 5]
 /** JSON が無い・壊れている場合に使う既定値（コード上の初期配置） */
 const DEFAULTS: ContentTransformMap = {
   1: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.5, autoRotate: false },
-  2: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: 0.0008, autoRotate: true },
+  2: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: 0.18, autoRotate: false },
   3: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: 0.07, autoRotate: true },
   4: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.03, autoRotate: true },
   5: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.0008, autoRotate: true },

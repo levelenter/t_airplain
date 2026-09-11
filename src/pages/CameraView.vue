@@ -6,6 +6,7 @@ import { useDebugMode } from '@/composables/useDebugMode'
 import { useArStore } from '@/stores/ar'
 import { useContentTransformStore } from '@/stores/contentTransform'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
+import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
 import { localize8thWallUi } from '@/utils/localize8thWallUi'
 import { MARKERS } from '@/utils/markers'
 import { playFoundSound, playTapSound } from '@/utils/sound'
@@ -78,6 +79,7 @@ onMounted(async () => {
   configureLandingPage()
   // 自動回転コンポーネントは a-scene 生成前に登録しておく必要がある
   registerAutoSpin()
+  registerGltfAnimation()
   ready.value = true
 
   // a-scene は v-if でこの後に挿入されるため、イベントは次フレームで購読する

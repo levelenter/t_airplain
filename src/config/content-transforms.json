@@ -8,8 +8,8 @@
   "2": {
     "position": [0, 0.1, 0],
     "rotation": [0, 0, 0],
-    "scale": 0.0008,
-    "autoRotate": true
+    "scale": 0.18,
+    "autoRotate": false
   },
   "3": {
     "position": [0, 0.1, 0],
