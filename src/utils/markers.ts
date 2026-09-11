@@ -16,7 +16,7 @@ export const MARKERS: MarkerDefinition[] = [
   { name: 'marker_1', title: '複葉機', contentId: 1 },
   { name: 'marker_2', title: 'セスナ', contentId: 2 },
   { name: 'marker_3', title: 'ジェットエンジン', contentId: 3 },
-  { name: 'marker_4', title: 'ダグラス DC-3', contentId: 4 },
+  { name: 'marker_4', title: 'C-1輸送機', contentId: 4 },
   { name: 'marker_5', title: 'ヘリコプター', contentId: 5 },
 ]
 

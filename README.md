@@ -31,7 +31,7 @@ src/
     Contents1.vue （複葉機）プリミティブなオブジェクトを配置して飛行機を作成
     Contents2.vue /public/3dmodels/model2_cessna.glb（セスナ）
     Contents3.vue /public/3dmodels/model3_jet.glb（ジェットエンジン）
-    Contents4.vue /public/3dmodels/model4_douglas.glb（ダグラス DC-3）
+    Contents4.vue /public/3dmodels/model4_C1_set.glb（C-1輸送機）
     Contents5.vue /public/3dmodels/model5_helico.glb（ヘリコプター）
   router/
   stores/
