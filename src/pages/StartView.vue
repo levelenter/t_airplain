@@ -14,6 +14,11 @@ function start() {
   // ?debug=true はカメラ画面まで引き継ぐ
   router.push({ name: 'camera', query: debugQuery.value })
 }
+
+/** カメラを使わず PC のブラウザでモデルの見え方を確認する */
+function openPreview() {
+  router.push({ name: 'preview' })
+}
 </script>
 
 <template>
@@ -36,6 +41,8 @@ function start() {
       </section>
 
       <p class="start__note">※ カメラの使用許可が必要です</p>
+
+      <button class="start__preview" type="button" @click="openPreview">PCでプレビュー（カメラ不要）</button>
       <p v-if="isDebug" class="start__debug">配置調整モード（?debug=true）で動作中</p>
     </div>
   </main>
@@ -117,6 +124,21 @@ function start() {
   margin-top: 20px;
   font-size: 0.8rem;
   opacity: 0.7;
+}
+
+.start__preview {
+  margin-top: 12px;
+  padding: 10px 24px;
+  font-size: 0.85rem;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.start__preview:hover {
+  background: rgb(255 255 255 / 12%);
 }
 
 .start__debug {

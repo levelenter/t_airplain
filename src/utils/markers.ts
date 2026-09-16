@@ -8,16 +8,18 @@ export interface MarkerDefinition {
   name: string
   /** HUD に表示する日本語タイトル */
   title: string
-  /** 対応するコンテンツ番号（pages/Contents1〜5.vue） */
-  contentId: 1 | 2 | 3 | 4 | 5
+  /** 対応するコンテンツ番号（pages/Contents1〜7.vue） */
+  contentId: 1 | 2 | 3 | 4 | 5 | 6 | 7
 }
 
 export const MARKERS: MarkerDefinition[] = [
-  { name: 'marker_1', title: '複葉機', contentId: 1 },
+  { name: 'marker_1', title: 'T-1Bの「鼻」のひみつ', contentId: 1 },
   { name: 'marker_2', title: 'T-6G 主翼のひみつ', contentId: 2 },
   { name: 'marker_3', title: 'ジェットエンジン', contentId: 3 },
   { name: 'marker_4', title: 'C-1輸送機', contentId: 4 },
-  { name: 'marker_5', title: 'ヘリコプター', contentId: 5 },
+  { name: 'marker_5', title: 'V-44 バートル：トルク打ち消し', contentId: 5 },
+  { name: 'marker_6', title: 'H-19 シコルスキー：テールローターの横押し', contentId: 6 },
+  { name: 'marker_7', title: '風の実験：右から左へ', contentId: 7 },
 ]
 
 export function findMarkerByName(name: string): MarkerDefinition | undefined {

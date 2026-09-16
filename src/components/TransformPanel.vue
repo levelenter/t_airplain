@@ -12,6 +12,11 @@ const props = defineProps<{
   contentId: ContentId
   /** 対象コンテンツの日本語名 */
   title: string
+  /**
+   * 置き場所。実機（bottom）は画面下部中央、PC プレビュー（right）は右側に縦長で出して
+   * 中央のモデルに被らないようにする
+   */
+  dock?: 'bottom' | 'right'
 }>()
 
 defineEmits<{ close: [] }>()
@@ -94,7 +99,7 @@ async function shareJson() {
 </script>
 
 <template>
-  <section class="panel" :class="{ 'panel--collapsed': collapsed }">
+  <section class="panel" :class="{ 'panel--collapsed': collapsed, 'panel--right': dock === 'right' }">
     <header class="panel__head">
       <span class="panel__title">調整: {{ title }}</span>
       <button class="panel__icon" type="button" @click="collapsed = !collapsed">
@@ -225,6 +230,19 @@ async function shareJson() {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+/* PC プレビュー用: 右端に寄せて縦に伸ばす */
+.panel--right {
+  top: 72px;
+  right: 16px;
+  bottom: auto;
+  left: auto;
+  transform: none;
+}
+
+.panel--right .panel__body {
+  max-height: calc(100vh - 160px);
 }
 
 /* 折りたたみ中はヘッダーだけにして視界を空ける */

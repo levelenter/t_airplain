@@ -1,5 +1,5 @@
 /**
- * 各コンテンツ（pages/Contents1〜5.vue）の表示位置・向き・大きさの定義。
+ * 各コンテンツ（pages/Contents1〜7.vue）の表示位置・向き・大きさの定義。
  *
  * 実機で調整した結果は `?debug=true` を付けて開いた調整パネルから JSON として書き出し、
  * その JSON で `src/config/content-transforms.json` を差し替えると次のビルドから反映される。
@@ -9,7 +9,7 @@
 import savedTransforms from '@/config/content-transforms.json'
 
 /** 調整対象のコンテンツ番号（markers.ts の contentId に対応） */
-export type ContentId = 1 | 2 | 3 | 4 | 5
+export type ContentId = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export type Vec3 = [number, number, number]
 
@@ -26,15 +26,17 @@ export interface ContentTransform {
 
 export type ContentTransformMap = Record<ContentId, ContentTransform>
 
-export const CONTENT_IDS: readonly ContentId[] = [1, 2, 3, 4, 5]
+export const CONTENT_IDS: readonly ContentId[] = [1, 2, 3, 4, 5, 6, 7]
 
 /** JSON が無い・壊れている場合に使う既定値（コード上の初期配置） */
 const DEFAULTS: ContentTransformMap = {
-  1: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.5, autoRotate: false },
+  1: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.3, autoRotate: false },
   2: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: 0.18, autoRotate: false },
   3: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: 0.07, autoRotate: true },
   4: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.03, autoRotate: true },
-  5: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.0008, autoRotate: true },
+  5: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.2, autoRotate: false },
+  6: { position: [0, 0.15, 0], rotation: [0, 0, 0], scale: 0.18, autoRotate: false },
+  7: { position: [0, 0, 0], rotation: [0, 0, 0], scale: 0.25, autoRotate: false },
 }
 
 function round(value: number, digits: number): number {
@@ -89,6 +91,8 @@ export function loadTransforms(): ContentTransformMap {
     3: normalize(saved['3'], DEFAULTS[3]),
     4: normalize(saved['4'], DEFAULTS[4]),
     5: normalize(saved['5'], DEFAULTS[5]),
+    6: normalize(saved['6'], DEFAULTS[6]),
+    7: normalize(saved['7'], DEFAULTS[7]),
   }
 }
 

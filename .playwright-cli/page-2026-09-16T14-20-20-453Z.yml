@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e15]:
+    - banner:
+      - button "← メニュー" [ref=e18] [cursor=pointer]
+      - generic [ref=e19]:
+        - generic [ref=e20]: マーカー
+        - combobox "マーカー" [ref=e21]:
+          - option "1. T-1Bの「鼻」のひみつ" [selected]
+          - option "2. T-6G 主翼のひみつ"
+          - option "3. ジェットエンジン"
+          - option "4. C-1輸送機"
+          - option "5. V-44 バートル：トルク打ち消し"
+          - option "6. H-19 シコルスキー：テールローターの横押し"
+          - option "7. 風の実験：右から左へ"
+      - generic [ref=e22] [cursor=pointer]:
+        - checkbox "マーカー画像" [checked] [ref=e23]
+        - text: マーカー画像
+      - button "視点リセット" [ref=e24] [cursor=pointer]
+      - button "調整" [ref=e70] [cursor=pointer]
+    - paragraph: ドラッグで回転 / ホイールで拡大縮小
+  - generic [ref=e3]:
+    - generic "Toggle devtools panel" [ref=e4] [cursor=pointer]:
+      - img [ref=e5]
+    - generic "Toggle Component Inspector" [ref=e10] [cursor=pointer]:
+      - img [ref=e11]

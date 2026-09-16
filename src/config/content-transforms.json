@@ -2,7 +2,7 @@
   "1": {
     "position": [0, 0.15, 0],
     "rotation": [0, 0, 0],
-    "scale": 0.5,
+    "scale": 0.3,
     "autoRotate": false
   },
   "2": {
@@ -26,7 +26,19 @@
   "5": {
     "position": [0, 0.15, 0],
     "rotation": [0, 0, 0],
-    "scale": 0.0008,
-    "autoRotate": true
+    "scale": 0.2,
+    "autoRotate": false
+  },
+  "6": {
+    "position": [0, 0.15, 0],
+    "rotation": [0, 0, 0],
+    "scale": 0.18,
+    "autoRotate": false
+  },
+  "7": {
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 0.25,
+    "autoRotate": false
   }
 }

@@ -2,22 +2,20 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import TransformPanel from '@/components/TransformPanel.vue'
+import IntakeExplanation from '@/components/IntakeExplanation.vue'
+import TandemExplanation from '@/components/TandemExplanation.vue'
+import TailRotorExplanation from '@/components/TailRotorExplanation.vue'
 import { useDebugMode } from '@/composables/useDebugMode'
 import { useArStore } from '@/stores/ar'
 import { useContentTransformStore } from '@/stores/contentTransform'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
+import { registerAdditiveGlow } from '@/utils/aframeAdditiveGlow'
 import { localize8thWallUi } from '@/utils/localize8thWallUi'
 import { MARKERS } from '@/utils/markers'
 import { playFoundSound, playTapSound } from '@/utils/sound'
 import { configureImageTargets, stopXR8 } from '@/utils/xr8'
-import Contents1 from './Contents1.vue'
-import Contents2 from './Contents2.vue'
-import Contents3 from './Contents3.vue'
-import Contents4 from './Contents4.vue'
-import Contents5 from './Contents5.vue'
-
-const CONTENTS = { 1: Contents1, 2: Contents2, 3: Contents3, 4: Contents4, 5: Contents5 } as const
+import { CONTENT_COMPONENTS } from './contentComponents'
 
 const router = useRouter()
 const arStore = useArStore()
@@ -80,6 +78,7 @@ onMounted(async () => {
   // 自動回転コンポーネントは a-scene 生成前に登録しておく必要がある
   registerAutoSpin()
   registerGltfAnimation()
+  registerAdditiveGlow()
   ready.value = true
 
   // a-scene は v-if でこの後に挿入されるため、イベントは次フレームで購読する
@@ -148,7 +147,7 @@ function handleTap() {
       <a-light type="ambient" intensity="0.7"></a-light>
 
       <component
-        :is="CONTENTS[marker.contentId]"
+        :is="CONTENT_COMPONENTS[marker.contentId]"
         v-for="marker in MARKERS"
         :key="marker.name"
         :marker-name="marker.name"
@@ -206,6 +205,18 @@ function handleTap() {
         調整
       </button>
     </header>
+
+    <IntakeExplanation
+      v-if="arStore.activeMarker?.contentId === 1 && arStore.visibleMarkerNames.has('marker_1') && !panelOpen"
+    />
+
+    <TandemExplanation
+      v-if="arStore.activeMarker?.contentId === 5 && arStore.visibleMarkerNames.has('marker_5') && !panelOpen"
+    />
+
+    <TailRotorExplanation
+      v-if="arStore.activeMarker?.contentId === 6 && arStore.isActivated('marker_6') && arStore.visibleMarkerNames.has('marker_6') && !panelOpen"
+    />
 
     <!-- 配置調整パネル（?debug=true のときのみ）。対象は認識中のマーカーに追従する -->
     <TransformPanel
