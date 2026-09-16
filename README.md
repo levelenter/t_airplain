@@ -137,19 +137,43 @@ JSON の項目が欠けていたり値が壊れている場合は、その項目
 形状・角度・気流は説明用の模式表現です。実機では `?debug=true` の調整パネルで
 マーカーに対する位置・向き・倍率を調整してください。
 
-### AR3：ジェットエンジンの気流
+### AR3：ジェットエンジンの吸気とアフターバーナー
 
-`marker_3`（`public/marker/marker3_jet.jpg`）を認識してタップすると、
-`public/3dmodels/model3_jet_airflow.glb`を表示します。写真を参考にした模式的な
-円筒形エンジン・吸気ファン・断面と、青い吸気、紫〜水色の排気を含みます。
-内蔵クリップ`Jet_Airflow_Loop_4s`でファンと気流を繰り返し再生し、非表示中は停止します。
-模型への重ね合わせ用に自動回転は無効。位置・回転・倍率は`?debug=true`で現地調整してください。
+`marker_3`（`public/marker/marker3_jet.jpg`）を認識してタップすると、写真を参考にした模式的な
+円筒形エンジン・吸気ファン・断面と、吸気口へ吸い込まれる光の流線、ノズルから噴き出すアフターバーナーの青白い炎を表示します。
+
+モデルは 3 つの GLB に分かれています。
+
+- `model3_jet_airflow.glb` … エンジン本体とファン回転のみ（クリップ `Jet_Airflow_Loop_4s`）。
+  旧版の水色の吸気ストリーク、紫〜水色の排気ストリーク・流線・半透明の筒は除去しました。
+- `model3_jet_intake_glow.glb` … 吸気。風エフェクト用スキル `blender-orbit-glow` の手法（Marker1 と同じ）で、
+  吸気口の前方から収束して吸い込まれるらせん状の光 22 本を X 軸まわりに 1 回転／4 秒で回します。
+  クリップ `Jet_Intake_Glow_Loop_4s`。生成は `__dev/output/glow_trails/create_jet_intake_glow.py`。
+- `model3_jet_afterburner_glow.glb` … アフターバーナー。専用スキル **`.claude/skills/blender-afterburner/`** で生成します。
+  出力は**青白い炎だけ**（`--nozzle-glow 0`）で、火力を強く見せるため `--intensity 1.7`（不透明度・白熱区間・ダイヤの強さ）、
+  長さ 11.5 にしています。スタイルは**円筒**（`--style cylinder`、既定）で、静止した形状はありません。
+  - 中心: 初期版と同じ回転するらせんの束 54 本（4 回転／4 秒）。ただし外へ広がらず、出口半径の円筒に収まる。長さは全体の 75%（`--core-length 0.75`）。
+    出口付近は白熱、下流ほど青く薄くなり、衝撃波ダイヤ 5 つは X 位置固定の明るい脈動
+  - 光条: 短い明るい光条 44 本が円筒の中を出口から下流へ移動して両端でフェード
+  - 陽炎: ほぼ無色に近い淡い波状リボン 16 本が円筒のすぐ外側を逆向き 2 群でゆっくり回り、輪郭が揺らめく
+  クリップ `Jet_Afterburner_Glow_Loop_4s`（約 4.1 MB）。
+
+`Contents3.vue` は 3 entity で、吸気と炎の entity にだけ `additive-glow` を付けます。
+模型への重ね合わせ用に自動回転は無効。位置・回転・倍率は `?debug=true` またはメニューの「PCでプレビュー」で調整してください。
 模型の実測寸法やマーカーからの距離を反映したモデルではありません。
 
-Blenderの編集用ファイル・再生成スクリプト・プレビューは`__dev/output/jet_ar3/`。
-`create_model.py`をBlenderで実行後、`python3 __dev/output/jet_ar3/finalize_glb.py`で
-アニメーションを1クリップに統合・検証し、配信用GLBへコピーします。
-`__dev/integration/ar3-check.html`は、カメラを使わず表示・ロスト時の停止を確認する開発用ページです。
+作業フォルダは `__dev/output/jet_afterburner/`（機体のみを出す `create_jet_airframe.py`、炎の生成物、AR 相当プレビュー）。
+`__dev/output/jet_ar3/` は旧版の生成物で、現在は使いません。
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/jet_afterburner/create_jet_airframe.py
+python3 __dev/output/glow_trails/finalize_airframe.py __dev/output/jet_afterburner/model3_jet_airframe.glb --clip Jet_Airflow_Loop_4s --copy-to public/3dmodels/model3_jet_airflow.glb --forbid Exhaust --forbid "Plume envelope" --forbid "moving streak"
+/Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_jet_intake_glow.py
+python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/glow_trails/model3_jet_intake_glow.glb --clip Jet_Intake_Glow_Loop_4s --copy-to public/3dmodels/
+/Applications/Blender.app/Contents/MacOS/Blender -b --python .claude/skills/blender-afterburner/scripts/create_afterburner.py -- --out __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --axis X --exit 7.7 --center 0,2 --exit-radius 1.22 --length 11.5 --core-length 0.75 --nozzle-glow 0 --intensity 1.7 --core-count 24,16,14 --streak-count 44 --shimmer-count 16 --turns 4 --diamonds 5 --scale-widths 1.2
+python3 .claude/skills/blender-afterburner/scripts/finalize_glb.py __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --clip Jet_Afterburner_Glow_Loop_4s --copy-to public/3dmodels/
+node .claude/skills/blender-afterburner/scripts/shot_preview.mjs . public/3dmodels/model3_jet_afterburner_glow.glb __dev/output/jet_afterburner 13,0,2 16 0.5
+```
 
 ### AR1：T-1Bの「鼻」のひみつ
 

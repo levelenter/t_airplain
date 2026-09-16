@@ -1,0 +1,21 @@
+<!doctype html><html><body style="margin:0;background:#000">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// ?glb=model.glb&target=x,y,z&dist=N&side=1  (side=1 looks along -Z at the target; side=0 looks from +X, i.e. into the nozzle)
+const q=new URLSearchParams(location.search);const glb=q.get('glb')||'model.glb';
+const target=(q.get('target')||'12,0,2').split(',').map(Number);const dist=parseFloat(q.get('dist')||'14');const side=q.get('side')!=='0';
+const r=new THREE.WebGLRenderer({antialias:true});r.setSize(800,800);document.body.appendChild(r.domElement);
+const sc=new THREE.Scene();sc.background=new THREE.Color(0x000000);
+const cam=new THREE.PerspectiveCamera(40,1,.1,200);
+if(side)cam.position.set(target[0],target[1]+dist*.12,target[2]+dist);else cam.position.set(target[0]+dist,target[1],target[2]);
+cam.lookAt(target[0],target[1],target[2]);
+const g=await new GLTFLoader().loadAsync(glb);
+// Same treatment as the runtime additive-glow component.
+g.scene.traverse(o=>{if(o.isMesh){o.material.blending=THREE.AdditiveBlending;o.material.transparent=true;o.material.depthWrite=false;}});
+sc.add(g.scene);
+const mixer=new THREE.AnimationMixer(g.scene);mixer.clipAction(g.animations[0]).play();
+window.renderAt=(t)=>{mixer.setTime(t);r.render(sc,cam);};
+window.renderAt(0.5);window.ready=true;
+</script></body></html>
