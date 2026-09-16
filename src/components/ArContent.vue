@@ -5,7 +5,7 @@
  * 階層は次の通り。自動回転をユーザー指定の向きと別の階層に分けることで、
  * rotation を指定したまま回転させても互いに干渉しない。
  *
- *   named-image-target        マーカー追従（PC プレビュー時は素の a-entity）
+ *   named-image-target        マーカー追従（開発用プレビュー時は素の a-entity）
  *     └ visible               タップされるまで隠す
  *         ├ position/rotation/scale   ← 調整パネルの対象
  *         │   └ auto-spin             ← Y 軸の自動回転
@@ -26,7 +26,7 @@ const props = defineProps<{
 }>()
 
 /**
- * PC プレビュー（PreviewView）では XR8 が動いていないため、
+ * 開発用プレビュー（PreviewView）では XR8 が動いていないため、
  * マーカー追従の要素を素の a-entity に差し替えて原点に固定表示する。
  */
 const isPreview = inject(AR_PREVIEW_KEY, false)

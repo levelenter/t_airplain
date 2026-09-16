@@ -1,7 +1,7 @@
 import type { InjectionKey } from 'vue'
 
 /**
- * PC プレビュー中かどうかを ArContent に伝える provide/inject キー。
+ * 開発用プレビュー中かどうかを ArContent に伝える provide/inject キー。
  * PreviewView が true を provide し、ArContent はマーカー追従要素を素の a-entity に置き換える。
  */
 export const AR_PREVIEW_KEY: InjectionKey<boolean> = Symbol('arPreview')

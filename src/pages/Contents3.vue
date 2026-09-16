@@ -25,7 +25,7 @@ const afterburnerUrl = `${import.meta.env.BASE_URL}3dmodels/model3_jet_afterburn
     ></a-entity>
     <a-entity
       :gltf-model="`url(${afterburnerUrl})`"
-      :gltf-animation="`clip: Jet_Afterburner_Glow_Loop_2s; enabled: ${active}`"
+      :gltf-animation="`clip: Jet_Afterburner_Glow_Loop_05s; enabled: ${active}`"
       additive-glow
     ></a-entity>
   </ArContent>

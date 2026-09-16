@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - paragraph [ref=e5]: 所沢航空発祥記念館
+      - heading "WebAR 体験" [level=1] [ref=e6]
+      - paragraph [ref=e7]:
+        - text: 館内の画像マーカーにスマートフォンをかざすと、
+        - text: 航空機にまつわるARコンテンツが現れます。
+      - button "スタート" [ref=e8] [cursor=pointer]
+      - generic [ref=e9]:
+        - heading "体験できるコンテンツ" [level=2] [ref=e10]
+        - list [ref=e11]:
+          - listitem [ref=e12]: T-1Bの「鼻」のひみつ
+          - listitem [ref=e13]: T-6G 主翼のひみつ
+          - listitem [ref=e14]: ジェットエンジン
+          - listitem [ref=e15]: C-1輸送機
+          - listitem [ref=e16]: V-44 バートル：トルク打ち消し
+          - listitem [ref=e17]: H-19 シコルスキー：テールローターの横押し
+      - paragraph [ref=e18]: ※ カメラの使用許可が必要です
+      - button "開発用プレビュー（カメラ不要）" [ref=e19] [cursor=pointer]
+  - generic [ref=e20]:
+    - generic "Toggle devtools panel" [ref=e21] [cursor=pointer]:
+      - img [ref=e22]
+    - generic "Toggle Component Inspector" [ref=e27] [cursor=pointer]:
+      - img [ref=e28]

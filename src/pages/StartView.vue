@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useDebugMode, useDebugQuery } from '@/composables/useDebugMode'
-import { MARKERS } from '@/utils/markers'
+import { AR_MARKERS } from '@/utils/markers'
 import { unlockAudio } from '@/utils/sound'
 
 const router = useRouter()
@@ -15,7 +15,7 @@ function start() {
   router.push({ name: 'camera', query: debugQuery.value })
 }
 
-/** カメラを使わず PC のブラウザでモデルの見え方を確認する */
+/** 開発用プレビュー: カメラを使わず PC のブラウザでモデルの見え方を確認する（AR から外したマーカーも表示） */
 function openPreview() {
   router.push({ name: 'preview' })
 }
@@ -36,13 +36,13 @@ function openPreview() {
       <section class="start__markers">
         <h2>体験できるコンテンツ</h2>
         <ol>
-          <li v-for="marker in MARKERS" :key="marker.name">{{ marker.title }}</li>
+          <li v-for="marker in AR_MARKERS" :key="marker.name">{{ marker.title }}</li>
         </ol>
       </section>
 
       <p class="start__note">※ カメラの使用許可が必要です</p>
 
-      <button class="start__preview" type="button" @click="openPreview">PCでプレビュー（カメラ不要）</button>
+      <button class="start__preview" type="button" @click="openPreview">開発用プレビュー（カメラ不要）</button>
       <p v-if="isDebug" class="start__debug">配置調整モード（?debug=true）で動作中</p>
     </div>
   </main>

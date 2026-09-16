@@ -73,11 +73,12 @@ npm run dev          # http://localhost:5173
 > macOS はファイル名を Unicode NFD で保存するため、濁点を含む日本語名（例: `〜など）.mp3`）は
 > コード中の文字列と URL が一致せず 404 になる。
 
-# PC でのローカルプレビュー（/preview）
+# 開発用プレビュー（/preview）
 
 スマホ実機やカメラを使わずに、マーカー上の AR コンテンツの見え方を PC のブラウザで確認できます。
+AR から外したマーカー（`markers.ts` で `previewOnly: true`、現在は Marker7）もここでは選べます。
 
-1. `npm run dev` で開発サーバーを起動し、メニュー画面の「PCでプレビュー（カメラ不要）」を押す
+1. `npm run dev` で開発サーバーを起動し、メニュー画面の「開発用プレビュー（カメラ不要）」を押す
    （URL 直接なら `http://localhost:5173/ar/preview`）
 2. 上部のプルダウンで確認したいマーカーを選ぶ
 3. マウスドラッグで視点を回転、ホイールで拡大縮小。「視点リセット」で初期視点に戻る
@@ -149,17 +150,18 @@ JSON の項目が欠けていたり値が壊れている場合は、その項目
 - `model3_jet_intake_glow.glb` … 吸気。風エフェクト用スキル `blender-orbit-glow` の手法（Marker1 と同じ）で、
   吸気口の前方から収束して吸い込まれるらせん状の光 22 本を X 軸まわりに 1 回転／4 秒で回します。
   クリップ `Jet_Intake_Glow_Loop_4s`。生成は `__dev/output/glow_trails/create_jet_intake_glow.py`。
-- `model3_jet_afterburner_glow.glb` … アフターバーナー。専用スキル **`.claude/skills/blender-afterburner/`** で生成します。
-  出力は**青白い炎だけ**（`--nozzle-glow 0`）で、火力を強く見せるため `--intensity 1.7`（不透明度・白熱区間・ダイヤの強さ）、
-  長さ 11.5 にしています。スタイルは**円筒**（`--style cylinder`、既定）で、静止した形状はありません。
-  - 中心: 初期版と同じ回転するらせんの束 54 本（4 回転／4 秒）。ただし外へ広がらず、出口半径の円筒に収まる。長さは全体の 75%（`--core-length 0.75`）。
-    出口付近は白熱、下流ほど青く薄くなり、衝撃波ダイヤ 5 つは X 位置固定の明るい脈動
-  - 光条: 短い明るい光条 44 本が円筒の中を出口から下流へ移動して両端でフェード
-  - 陽炎: ほぼ無色に近い淡い波状リボン 16 本が円筒のすぐ外側を逆向き 2 群でゆっくり回り、輪郭が揺らめく
-  クリップ `Jet_Afterburner_Glow_Loop_4s`（約 4.1 MB）。
+- `model3_jet_afterburner_glow.glb` … アフターバーナー。専用スキル **`.claude/skills/blender-afterburner/`** の**既定値そのまま**で生成します
+  （エンジン座標に `--seconds 0.5 --fps 60` を加えるだけ）。青白い炎だけで、静止した形状はなく、ループ 0.5 秒・60fps（スキル既定の 2 秒の 4 倍速）で勢いを出しています。
+  - 中心: 回転するらせんの束 54 本（4 回転／ループ）。出口では出口半径いっぱい、先端へ向かって蝋燭の炎のように
+    一点へ細く収束する（`--core-taper candle`）。出口付近は白熱、下流ほど青く薄くなり、衝撃波ダイヤ 5 つは X 位置固定の明るい脈動。
+    長さは全体の 2/3（`--core-length 0.667`）
+  - 光条: 短い明るい光条 44 本が出口から下流へ移動して両端でフェード。走行域は全体の 1.25 倍（`--tail-length 1.25`）にわたる
+    らせんと同じ炎型の円錐で、外側の光条ほど円錐が細くなる手前で消える
+  - 陽炎: 淡い波状リボン 16 本が円筒のすぐ外側を逆向き 2 群でゆっくり回り、輪郭が揺らめく（収束させない）。長さは 1.25 倍
+  クリップ `Jet_Afterburner_Glow_Loop_05s`（約 4.0 MB）。
 
 `Contents3.vue` は 3 entity で、吸気と炎の entity にだけ `additive-glow` を付けます。
-模型への重ね合わせ用に自動回転は無効。位置・回転・倍率は `?debug=true` またはメニューの「PCでプレビュー」で調整してください。
+模型への重ね合わせ用に自動回転は無効。位置・回転・倍率は `?debug=true` またはメニューの「開発用プレビュー」で調整してください。
 模型の実測寸法やマーカーからの距離を反映したモデルではありません。
 
 作業フォルダは `__dev/output/jet_afterburner/`（機体のみを出す `create_jet_airframe.py`、炎の生成物、AR 相当プレビュー）。
@@ -170,9 +172,9 @@ JSON の項目が欠けていたり値が壊れている場合は、その項目
 python3 __dev/output/glow_trails/finalize_airframe.py __dev/output/jet_afterburner/model3_jet_airframe.glb --clip Jet_Airflow_Loop_4s --copy-to public/3dmodels/model3_jet_airflow.glb --forbid Exhaust --forbid "Plume envelope" --forbid "moving streak"
 /Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_jet_intake_glow.py
 python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/glow_trails/model3_jet_intake_glow.glb --clip Jet_Intake_Glow_Loop_4s --copy-to public/3dmodels/
-/Applications/Blender.app/Contents/MacOS/Blender -b --python .claude/skills/blender-afterburner/scripts/create_afterburner.py -- --out __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --axis X --exit 7.7 --center 0,2 --exit-radius 1.22 --length 11.5 --core-length 0.75 --nozzle-glow 0 --intensity 1.7 --core-count 24,16,14 --streak-count 44 --shimmer-count 16 --turns 4 --diamonds 5 --scale-widths 1.2
-python3 .claude/skills/blender-afterburner/scripts/finalize_glb.py __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --clip Jet_Afterburner_Glow_Loop_4s --copy-to public/3dmodels/
-node .claude/skills/blender-afterburner/scripts/shot_preview.mjs . public/3dmodels/model3_jet_afterburner_glow.glb __dev/output/jet_afterburner 13,0,2 16 0.5
+/Applications/Blender.app/Contents/MacOS/Blender -b --python .claude/skills/blender-afterburner/scripts/create_afterburner.py -- --out __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --axis X --exit 7.7 --center 0,2 --exit-radius 1.22 --seconds 0.5 --fps 60
+python3 .claude/skills/blender-afterburner/scripts/finalize_glb.py __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --clip Jet_Afterburner_Glow_Loop_05s --copy-to public/3dmodels/
+node .claude/skills/blender-afterburner/scripts/shot_preview.mjs . public/3dmodels/model3_jet_afterburner_glow.glb __dev/output/jet_afterburner 13,0,2 16 0.05 0.25
 ```
 
 ### AR1：T-1Bの「鼻」のひみつ
@@ -204,7 +206,7 @@ node .claude/skills/blender-orbit-glow/scripts/shot_preview.mjs . public/3dmodel
 
 形状と流路は写真・原稿に基づく説明用模式図で、実測モデルや流体解析ではありません。
 秒速約220mは提供原稿の参考値で、実機の特定運転条件を検証した値ではありません。
-初期倍率0.3、自動回転なし。実機への重ね合わせは `?debug=true` またはメニューの「PCでプレビュー」で調整してください。
+初期倍率0.3、自動回転なし。実機への重ね合わせは `?debug=true` またはメニューの「開発用プレビュー」で調整してください。
 
 ### Marker5：V-44 バートル・逆回転の渦とトルク打ち消し
 
@@ -236,7 +238,7 @@ python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/g
 ```
 
 初期倍率は0.2。実機の寸法や流体解析を再現したモデルではありません。
-マーカーに対する位置・向き・倍率は `?debug=true` またはメニューの「PCでプレビュー」で調整してください。
+マーカーに対する位置・向き・倍率は `?debug=true` またはメニューの「開発用プレビュー」で調整してください。
 
 ### Marker6（新設）：H-19 シコルスキー・テールローターの横押し
 
@@ -275,9 +277,11 @@ python3 __dev/output/glow_trails/finalize_airframe.py __dev/output/glow_trails/m
 python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/glow_trails/model6_h19_airflow_glow.glb --clip H19_Airflow_Glow_Loop_4s --copy-to public/3dmodels/
 ```
 
-### Marker7（実験用）：緑に発光する軌道の光跡エフェクト
+### Marker7（実験用・AR からは除外）：緑に発光する軌道の光跡エフェクト
 
-`marker_7` は新設の実験用ターゲットです。`public/marker/marker7_wind.png` を
+`marker_7` は実験用ターゲットです。**AR（カメラ画面）では認識・表示しません**（`src/utils/markers.ts` で
+`previewOnly: true`。画像ターゲットの登録対象からも外れ、メニューの一覧にも出ません）。
+開発用プレビュー（/preview）では「プレビューのみ」として選択でき、見え方の確認に使えます。`public/marker/marker7_wind.png` を
 印刷または別画面に表示して認識させてください。編集可能なSVGも同じ場所に保存しています。
 共通の中心を囲む20本の傾いたリング（主軌道9本・淡い内側5本・細い外側6本）が
 それぞれ別方向・別速度で回転し、全体もゆっくり歳差運動します。

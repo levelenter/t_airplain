@@ -12,7 +12,7 @@ import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
 import { registerAdditiveGlow } from '@/utils/aframeAdditiveGlow'
 import { localize8thWallUi } from '@/utils/localize8thWallUi'
-import { MARKERS } from '@/utils/markers'
+import { AR_MARKERS } from '@/utils/markers'
 import { playFoundSound, playTapSound } from '@/utils/sound'
 import { configureImageTargets, stopXR8 } from '@/utils/xr8'
 import { CONTENT_COMPONENTS } from './contentComponents'
@@ -72,7 +72,7 @@ onMounted(async () => {
   arStore.reset()
   // 許可ダイアログより先に監視を始める
   stopLocalize = localize8thWallUi()
-  arStore.loadedMarkerNames = await configureImageTargets(MARKERS.map((m) => m.name))
+  arStore.loadedMarkerNames = await configureImageTargets(AR_MARKERS.map((m) => m.name))
 
   configureLandingPage()
   // 自動回転コンポーネントは a-scene 生成前に登録しておく必要がある
@@ -148,7 +148,7 @@ function handleTap() {
 
       <component
         :is="CONTENT_COMPONENTS[marker.contentId]"
-        v-for="marker in MARKERS"
+        v-for="marker in AR_MARKERS"
         :key="marker.name"
         :marker-name="marker.name"
         :active="arStore.isActivated(marker.name)"

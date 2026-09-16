@@ -2,10 +2,16 @@ import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { MARKERS } from '../utils/markers'
+import { AR_MARKERS, MARKERS } from '../utils/markers'
 import { CONTENT_IDS, loadTransforms } from '../utils/contentTransform'
 import { useArStore } from '../stores/ar'
 import { useContentTransformStore } from '../stores/contentTransform'
+
+it('keeps Marker7 out of the AR marker set but available to the developer preview', () => {
+  expect(MARKERS.find((marker) => marker.name === 'marker_7')?.previewOnly).toBe(true)
+  expect(AR_MARKERS.map((marker) => marker.name)).not.toContain('marker_7')
+  expect(AR_MARKERS.map((marker) => marker.contentId)).toEqual([1, 2, 3, 4, 5, 6])
+})
 
 it('registers the independent wind study, target resources and adjustable placement', () => {
   setActivePinia(createPinia())

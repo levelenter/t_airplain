@@ -1,0 +1,70 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e32]:
+    - banner:
+      - button "← メニュー" [ref=e35] [cursor=pointer]
+      - generic [ref=e36]:
+        - generic [ref=e37]: マーカー
+        - combobox "マーカー" [ref=e38]:
+          - option "1. T-1Bの「鼻」のひみつ" [selected]
+          - option "2. T-6G 主翼のひみつ"
+          - option "3. ジェットエンジン"
+          - option "4. C-1輸送機"
+          - option "5. V-44 バートル：トルク打ち消し"
+          - option "6. H-19 シコルスキー：テールローターの横押し"
+          - option "7. 風の実験：右から左へ（プレビューのみ）"
+      - generic [ref=e39] [cursor=pointer]:
+        - checkbox "マーカー画像" [checked] [ref=e40]
+        - text: マーカー画像
+      - button "視点リセット" [ref=e41] [cursor=pointer]
+    - paragraph: ドラッグで回転 / ホイールで拡大縮小
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]: "調整: T-1Bの「鼻」のひみつ"
+        - button "▼" [ref=e45] [cursor=pointer]
+        - button "閉じる" [ref=e46] [cursor=pointer]: ×
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: 位置
+          - generic [ref=e50]:
+            - generic [ref=e51]: X
+            - slider "X 0" [ref=e52]: "0"
+            - spinbutton [ref=e53]: "0"
+          - generic [ref=e54]:
+            - generic [ref=e55]: "Y"
+            - slider "Y 0.15" [ref=e56]: "0.15"
+            - spinbutton [ref=e57]: "0.15"
+          - generic [ref=e58]:
+            - generic [ref=e59]: Z
+            - slider "Z 0" [ref=e60]: "0"
+            - spinbutton [ref=e61]: "0"
+        - generic [ref=e62]:
+          - generic [ref=e63]: 回転
+          - generic [ref=e64]:
+            - generic [ref=e65]: X
+            - slider "X 0" [ref=e66]: "0"
+            - spinbutton [ref=e67]: "0"
+          - generic [ref=e68]:
+            - generic [ref=e69]: "Y"
+            - slider "Y 0" [ref=e70]: "0"
+            - spinbutton [ref=e71]: "0"
+          - generic [ref=e72]:
+            - generic [ref=e73]: Z
+            - slider "Z 0" [ref=e74]: "0"
+            - spinbutton [ref=e75]: "0"
+        - generic [ref=e76]:
+          - generic [ref=e77]: 大きさ
+          - generic [ref=e78]:
+            - generic [ref=e79]: 倍率
+            - slider "倍率 0.3" [ref=e80]: "-0.52"
+            - spinbutton [ref=e81]: "0.3"
+        - generic [ref=e82]:
+          - checkbox "自動回転" [ref=e83]
+          - text: 自動回転
+        - generic [ref=e84]:
+          - button "このコンテンツを初期値に" [ref=e85] [cursor=pointer]
+          - button "JSON を送信" [ref=e86] [cursor=pointer]
+  - generic [ref=e20]:
+    - generic "Toggle devtools panel" [ref=e21] [cursor=pointer]:
+      - img [ref=e22]
+    - generic "Toggle Component Inspector" [ref=e27] [cursor=pointer]:
+      - img [ref=e28]

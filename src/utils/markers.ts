@@ -10,6 +10,11 @@ export interface MarkerDefinition {
   title: string
   /** 対応するコンテンツ番号（pages/Contents1〜7.vue） */
   contentId: 1 | 2 | 3 | 4 | 5 | 6 | 7
+  /**
+   * true なら AR（カメラ画面・メニューの一覧）には出さず、開発用プレビュー（/preview）でだけ表示する。
+   * 実験用コンテンツを実機から外しつつ、PC で見え方を確認し続けるために使う。
+   */
+  previewOnly?: boolean
 }
 
 export const MARKERS: MarkerDefinition[] = [
@@ -19,8 +24,11 @@ export const MARKERS: MarkerDefinition[] = [
   { name: 'marker_4', title: 'C-1輸送機', contentId: 4 },
   { name: 'marker_5', title: 'V-44 バートル：トルク打ち消し', contentId: 5 },
   { name: 'marker_6', title: 'H-19 シコルスキー：テールローターの横押し', contentId: 6 },
-  { name: 'marker_7', title: '風の実験：右から左へ', contentId: 7 },
+  { name: 'marker_7', title: '風の実験：右から左へ', contentId: 7, previewOnly: true },
 ]
+
+/** AR で実際に認識・表示するマーカー（previewOnly を除いたもの） */
+export const AR_MARKERS: MarkerDefinition[] = MARKERS.filter((m) => !m.previewOnly)
 
 export function findMarkerByName(name: string): MarkerDefinition | undefined {
   return MARKERS.find((m) => m.name === name)

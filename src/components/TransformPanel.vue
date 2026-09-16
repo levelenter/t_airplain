@@ -13,7 +13,7 @@ const props = defineProps<{
   /** 対象コンテンツの日本語名 */
   title: string
   /**
-   * 置き場所。実機（bottom）は画面下部中央、PC プレビュー（right）は右側に縦長で出して
+   * 置き場所。実機（bottom）は画面下部中央、開発用プレビュー（right）は右側に縦長で出して
    * 中央のモデルに被らないようにする
    */
   dock?: 'bottom' | 'right'
@@ -232,7 +232,7 @@ async function shareJson() {
   cursor: pointer;
 }
 
-/* PC プレビュー用: 右端に寄せて縦に伸ばす */
+/* 開発用プレビュー用: 右端に寄せて縦に伸ばす */
 .panel--right {
   top: 72px;
   right: 16px;

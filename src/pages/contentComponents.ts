@@ -9,7 +9,7 @@ import Contents7 from './Contents7.vue'
 
 /**
  * コンテンツ番号 → コンポーネントの対応表。
- * 実機の CameraView と PC 用の PreviewView の両方から同じものを使う。
+ * 実機の CameraView と 開発用プレビュー PreviewView の両方から同じものを使う。
  */
 export const CONTENT_COMPONENTS = {
   1: Contents1,

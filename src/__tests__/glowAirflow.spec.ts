@@ -48,7 +48,7 @@ describe('Marker3 jet intake and afterburner glow', () => {
 
   it('ships the afterburner as a spinning helix core in a straight cylinder, with streaks and shimmer', () => {
     const model = readGltfJson('model3_jet_afterburner_glow.glb')
-    expectUnlitGlow(model, 'Jet_Afterburner_Glow_Loop_2s', 114)
+    expectUnlitGlow(model, 'Jet_Afterburner_Glow_Loop_05s', 114)
     const names = nodeNames(model)
     for (const root of ['AB_Core_Root', 'AB_Streak_Root', 'AB_Shimmer_Root_A', 'AB_Shimmer_Root_B']) {
       expect(names).toContain(root)

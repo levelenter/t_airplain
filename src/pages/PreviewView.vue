@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
- * PC 用ローカルプレビュー。
+ * 開発用プレビュー（PC のブラウザで動作）。
  *
+ * AR から外した previewOnly のマーカーも含めて全コンテンツを確認できる。
  * カメラも 8th Wall（XR8）も使わず、A-Frame（8frame）だけでマーカー上の AR コンテンツを描画する。
  * マーカー画像を原点に置いた板として表示し、その上に実機と同じ Contents1〜7 を
  * 同じ配置値（content-transforms.json）で重ねるので、位置・向き・倍率の当たりを PC で付けられる。
@@ -127,7 +128,7 @@ function goBack() {
         <span>マーカー</span>
         <select v-model="selectedName">
           <option v-for="marker in MARKERS" :key="marker.name" :value="marker.name">
-            {{ marker.contentId }}. {{ marker.title }}
+            {{ marker.contentId }}. {{ marker.title }}{{ marker.previewOnly ? '（プレビューのみ）' : '' }}
           </option>
         </select>
       </label>

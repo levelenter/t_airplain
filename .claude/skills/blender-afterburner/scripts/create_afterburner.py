@@ -23,8 +23,17 @@ intensity, 2-second loop. Only the engine frame (--axis/--exit/--center/--exit-r
   --wall-depth F        how far inside the exit the amber rings reach (default 1.1)
   --wall-taper F        radius increase per unit going back into the nozzle (default 0.175)
   --length F            length of the plume (default 11.5); the haze runs 15% further
-  --core-length F       helix/cylinder core length as a fraction of --length (default 0.75: the helices end a little
-                        before the streaks and shimmer do)
+  --core-length F       helix/cylinder core length as a fraction of --length (default 0.667)
+  --core-taper candle|none  cylinder style: candle (default) narrows the helix core to a point at its end like a
+                        candle flame, and the streak zone to a point at the end of the streak run (outer streaks
+                        die where the cone gets too narrow for them). none keeps flat-ended cylinders.
+                        The shimmer is never tapered
+  --tail-length F       cylinder style: streak run and shimmer length as a multiple of --length (default 1.25, so
+                        they trail a little past the tip of the helix core)
+  --tail-radius F       multiplier on the streak zone and shimmer radii (default 0.9: a slightly slimmer cylinder
+                        around the helix core)
+  --core-radius F       multiplier on the helix radii (default 1.1: the outermost helices at the root reach ~0.86 of
+                        the exit radius and just touch the streak zone). 1.0 leaves a thin dark gap around the core
   --diamonds N          number of shock diamonds (default 5), spaced --diamond-gap apart (default 1.2)
   --core R,G,B --core-hot R,G,B --core-deep R,G,B    core colours (blue / near white / deep blue)
   --amber R,G,B --amber-hot R,G,B --amber-deep R,G,B  nozzle glow colours
@@ -60,7 +69,7 @@ from pathlib import Path
 def parse():
  argv=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else []
  opt={'out':str(Path(__file__).resolve().parent/'afterburner.glb'),'axis':'X','exit':7.7,'center':'0,2','exit_radius':1.22,
-      'wall_depth':1.1,'wall_taper':0.175,'length':11.5,'core_length':0.75,'diamonds':5,'diamond_gap':1.2,
+      'wall_depth':1.1,'wall_taper':0.175,'length':11.5,'core_length':0.667,'core_taper':'candle','tail_length':1.25,'core_radius':1.1,'tail_radius':0.9,'diamonds':5,'diamond_gap':1.2,
       'core':'0.45,0.72,1.0','core_hot':'0.92,0.96,1.0','core_deep':'0.15,0.35,1.0',
       'amber':'1.0,0.55,0.15','amber_hot':'1.0,0.88,0.55','amber_deep':'0.9,0.22,0.02',
       'haze':'0.25,0.5,1.0','haze_deep':'0.08,0.2,0.9',
@@ -211,6 +220,10 @@ def spinning_root(name,along,turns):
 # toward the second. A helix angle = a0 + k*t with the group spinning by -turns therefore slides the
 # pattern toward +t (downstream); see the screw-illusion note in SKILL.md.
 EXIT=O['exit'];R_EXIT=O['exit_radius'];LENGTH=O['length'];CORE_LEN=LENGTH*O['core_length'];count=0
+def flame_taper(t):
+ """Radius multiplier along the core (t 0..1). candle: full at the exit, long taper to a point at the tip."""
+ if O['style']!='cylinder' or O['core_taper']!='candle':return 1
+ u=1-t;return math.sin(.5*math.pi*u**.85)*(1-.12*u)/.88
 
 # ----------------------------------------------------------------------------- nozzle glow (optional)
 nozzle=spinning_root('AB_Nozzle_Glow_Root',EXIT,1) if O['nozzle_glow'] else None
@@ -247,35 +260,46 @@ n_main,n_faint,n_streak=O['core_count']
 
 if O['style'] in ('helix','cylinder'):
  # Screw illusion: helices wound with +angle, group spun by -turns => pattern slides to +t (downstream).
- core=spinning_root('AB_Core_Root',EXIT,-O['turns']);specs=[]
- for j in range(n_main):specs.append((2*math.pi*j/n_main,random.uniform(3.0,3.8),random.uniform(.12,.62)*R_EXIT,'main'))
- for j in range(n_faint):specs.append((2*math.pi*(j+.5)/n_faint,random.uniform(2.6,4.2),random.uniform(.16,.5)*R_EXIT,'faint'))
- for j in range(n_streak):specs.append((random.uniform(0,2*math.pi),random.uniform(3.5,5),random.uniform(.5,.78)*R_EXIT,'streak'))
+ core=spinning_root('AB_Core_Root',EXIT,-O['turns']);specs=[];CR=R_EXIT*O['core_radius']
+ for j in range(n_main):specs.append((2*math.pi*j/n_main,random.uniform(3.0,3.8),random.uniform(.12,.62)*CR,'main'))
+ for j in range(n_faint):specs.append((2*math.pi*(j+.5)/n_faint,random.uniform(2.6,4.2),random.uniform(.16,.5)*CR,'faint'))
+ for j in range(n_streak):specs.append((random.uniform(0,2*math.pi),random.uniform(3.5,5),random.uniform(.5,.78)*CR,'streak'))
  flare=0 if O['style']=='cylinder' else .37*R_EXIT  # cylinder: constant radius, the plume stays inside the exit circle
  for a0,windings,r0,kind in specs:
   def point(t,a0=a0,windings=windings,r0=r0):
-   a=a0+2*math.pi*windings*t;r=r0+flare*t
+   a=a0+2*math.pi*windings*t;r=(r0+flare*t)*flame_taper(t)
    return place(CORE_LEN*t,r*math.cos(a),r*math.sin(a))
   o=ribbon('AB_Core_Trail_%02d'%count,point,CORE[kind],diamond_profile(random_pulses()),110,fade=.04,modulate=core_modulate);o.parent=core;count+=1
  if O['style']=='cylinder':
   # short bright streaks racing down the cylinder (same as straight style)
   travel=static_root('AB_Streak_Root',EXIT)
+  TAIL=LENGTH*O['tail_length'];TR=O['tail_radius']  # streaks and shimmer run past the core tip, in a slimmer cylinder
+  tapered=O['core_taper']=='candle'
+  def streak_run(r0):
+   # candle: the streak zone is a flame cone over TAIL; a streak at radius r0 stops where the cone narrows below it
+   if not tapered:return TAIL
+   f=r0/(.85*R_EXIT*TR)
+   for k in range(200,-1,-1):
+    t=k/200
+    if flame_taper(t)>=f:return TAIL*t
+   return TAIL*.2
   for j in range(O['streak_count']):
-   a0=random.uniform(0,2*math.pi);r0=random.uniform(.08,.85)*R_EXIT;length=random.uniform(1.0,2.2)*R_EXIT
+   a0=random.uniform(0,2*math.pi);r0=random.uniform(.08,.85)*R_EXIT*TR;length=random.uniform(1.0,2.2)*R_EXIT
+   run=streak_run(r0)+length
    def point(t,a0=a0,r0=r0,length=length):return place(length*t,r0*math.cos(a0),r0*math.sin(a0))
    o=ribbon('AB_Streak_%02d'%j,point,CORE['streak'],comet_profile([(.8,.06,.35,1)]),16,fade=.15)
-   o.parent=travel;travelling(o,random.uniform(0,1),LENGTH*1.05+length,-length*.5);count+=1
+   o.parent=travel;travelling(o,random.uniform(0,1),run,-length*.5);count+=1
   # heat shimmer: pale wavy ribbons hugging the outside of the cylinder, two groups counter-rotating
   pale=lerp(hh,(1,1,1),.5)
   SHIMMER=[(1.6*W,op(.05),hz,pale,1.4),(.7*W,op(.09),lerp(hz,pale,.5),pale,1.8)]
   for turns,tag in [(1,'A'),(-1,'B')]:
    shim=spinning_root('AB_Shimmer_Root_%s'%tag,EXIT,turns)
    for j in range(O['shimmer_count']//2):
-    a0=2*math.pi*j/(O['shimmer_count']//2)+random.uniform(-.2,.2);r0=random.uniform(1.0,1.25)*R_EXIT
-    waves=random.uniform(2.5,5);amp=random.uniform(.08,.18)*R_EXIT;phi=random.uniform(0,2*math.pi)
+    a0=2*math.pi*j/(O['shimmer_count']//2)+random.uniform(-.2,.2);r0=random.uniform(1.0,1.25)*R_EXIT*TR
+    waves=random.uniform(2.5,5);amp=random.uniform(.08,.18)*R_EXIT*TR;phi=random.uniform(0,2*math.pi)
     def point(t,a0=a0,r0=r0,waves=waves,amp=amp,phi=phi):
-     r=r0+.12*R_EXIT*t+amp*math.sin(2*math.pi*waves*t+phi);a=a0+.15*math.sin(2*math.pi*waves*t*.7+phi)
-     return place(LENGTH*1.1*t,r*math.cos(a),r*math.sin(a))
+     r=r0+.12*R_EXIT*TR*t+amp*math.sin(2*math.pi*waves*t+phi);a=a0+.15*math.sin(2*math.pi*waves*t*.7+phi)
+     return place(TAIL*t,r*math.cos(a),r*math.sin(a))
     o=ribbon('AB_Shimmer_%s_%02d'%(tag,j),point,SHIMMER,comet_profile([(random.uniform(.15,.45),.2,.3,1),(random.uniform(.55,.85),.15,.25,.7)]),90,fade=.08,modulate=haze_modulate)
     o.parent=shim;count+=1
  haze=spinning_root('AB_Haze_Root',EXIT,-2)
