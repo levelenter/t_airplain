@@ -185,20 +185,34 @@ node .claude/skills/blender-orbit-glow/scripts/shot_preview.mjs . public/3dmodel
 ### Marker5：V-44 バートル・逆回転の渦とトルク打ち消し
 
 既存の `marker_5`（`public/marker/marker5_helico.jpg`）を認識してタップすると、
-V-44の説明用機体モデル、前後の逆回転ローター、下向きに進む青い渦の矢印を表示します。
+V-44の説明用機体モデル、前後の逆回転ローター、ローター下へ渦を巻いて降りる光の下降気流を表示します。
 原稿の「AR4」はコンテンツ名として扱い、指定どおりMarker5に配置しています。
 機体側面の大きな左右の矢印でトルクの打ち消しを示します。上部の回転矢印はありません。
-12本の太いらせんと24個の移動する矢印、下方へ広がる気流で渦を強調しています。
-機体全体の自動回転は無効にしています。
-内蔵クリップ `V44_CounterRotation_Loop_4s` は4秒周期。非表示中は再生を停止します。
+
+モデルは 2 つの GLB に分かれています。
+
+- `model5_v44_airflow.glb` … 機体・逆回転ローター・トルク矢印（クリップ `V44_CounterRotation_Loop_4s`）
+- `model5_v44_airflow_glow.glb` … 下降気流。`blender-orbit-glow` スキルの手法で、各ローターの左右に
+  らせん状の光の柱（1 本あたり主線 3・淡い線 3・極細 2、計 32 本）を置き、ローターと同じ向きに
+  2 回転／4 秒で回します。らせんはねじなので、回すと光が地面へ降りて見えます。
+  **色分け**は従来どおり前ローター＝青、後ローター＝ターコイズです。
+  クリップ `V44_Downwash_Glow_Loop_4s`。`Contents5.vue` ではこの entity にだけ `additive-glow` を付けます。
+
+機体全体の自動回転は無効にしています。非表示中は再生を停止します。
 画面下の解説は、トルクの相殺とテールローターが不要な仕組みを説明します。
 
-Blender編集用ファイル・プレビュー・生成スクリプトは `__dev/output/v44_ar5/`。
-再生成はBlenderで `create_model.py` を実行した後、
-`python3 __dev/output/v44_ar5/finalize_glb.py` を実行します。
-カメラなしの統合確認ページは `__dev/integration/ar5-check.html`。
+生成スクリプトは `__dev/output/glow_trails/`（`create_v44_airframe.py` と `create_v44_glow.py`、
+共通処理は `glow_trails.py`）。`__dev/output/v44_ar5/` は矢印入りの旧版で、現在は使いません。
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_v44_airframe.py
+python3 __dev/output/glow_trails/finalize_airframe.py __dev/output/glow_trails/model5_v44_airframe.glb --clip V44_CounterRotation_Loop_4s --copy-to public/3dmodels/model5_v44_airflow.glb
+/Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_v44_glow.py
+python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/glow_trails/model5_v44_airflow_glow.glb --clip V44_Downwash_Glow_Loop_4s --copy-to public/3dmodels/
+```
+
 初期倍率は0.2。実機の寸法や流体解析を再現したモデルではありません。
-マーカーに対する位置・向き・倍率は `?debug=true` で現地調整してください。
+マーカーに対する位置・向き・倍率は `?debug=true` またはメニューの「PCでプレビュー」で調整してください。
 
 ### Marker6（新設）：H-19 シコルスキー・テールローターの横押し
 
@@ -209,19 +223,33 @@ Blender編集用ファイル・プレビュー・生成スクリプトは `__dev
 実際の展示写真を認識画像にする場合は、その写真からターゲットを再生成してください。
 
 H-19の模式的な機体、水平面内で回るメインローター、垂直面内で回るテールローターを表示します。
-青い下降気流12本・赤い横向き気流10本を平たい半透明リボンで表現し、計44本の矢印付きリボンが流れます。
-リボンは両面表示。帯の不透明度は最大40%、平たい矢印先端は最大60%、流路ガイドは最大12%です。
-幅方向の頂点アルファで縁をぼかし、先端の三角形で流れる方向を示します。
+気流は `blender-orbit-glow` スキルの手法による光の流線で、**色分け**は青＝メインローターの下降気流、
+赤＝テールローターが押し出す横向きの気流です。
 上部の青い円弧はメインローターと逆向きの機体反作用トルクを表します。
 尾部の大きな赤い矢印は機体が押される方向で、赤い気流と逆向きです。
 Blender座標で尾部位置+X、気流-Y、尾部反力+Y、反力トルク+Zとし、
 メインローター+Zによる機体反作用-Zを抑える関係です。
 
-再生クリップは `H19_AntiTorque_Loop_4s`。初期倍率0.18、自動回転なし。
-配置調整・JSON出力も6番に対応しています。力・流速・形状は実測や流体解析ではなく説明用です。
-編集用ファイル・生成/検証スクリプト・プレビューは `__dev/output/h19_ar6/`。
-Blenderで `create_model.py` を実行後、`python3 __dev/output/h19_ar6/finalize_glb.py` で配信用GLBを更新します。
-カメラなしの確認ページは `__dev/integration/ar6-check.html`。
+モデルは 2 つの GLB に分かれています。
+
+- `model6_h19_antitorque.glb` … 機体・両ローター・トルク円弧・尾部反力矢印・ラベル（クリップ `H19_AntiTorque_Loop_4s`）
+- `model6_h19_airflow_glow.glb` … 気流。青は機体を囲んで広がりながら降りるらせん 26 本
+  （メインローターと同じ向きに 2 回転／4 秒）、赤はテールローターから -Y へ伸びる筒状のらせん 20 本
+  （テールローターと同じ向きに 4 回転／4 秒）。どちらも回すと光がローターから離れる向きに流れます。
+  クリップ `H19_Airflow_Glow_Loop_4s`。`Contents6.vue` ではこの entity にだけ `additive-glow` を付けます。
+
+初期倍率0.18、自動回転なし。配置調整・JSON出力も6番に対応しています。
+力・流速・形状は実測や流体解析ではなく説明用です。
+
+生成スクリプトは `__dev/output/glow_trails/`（`create_h19_airframe.py` と `create_h19_glow.py`）。
+`__dev/output/h19_ar6/` はリボン入りの旧版で、現在は使いません。
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_h19_airframe.py
+python3 __dev/output/glow_trails/finalize_airframe.py __dev/output/glow_trails/model6_h19_airframe.glb --clip H19_AntiTorque_Loop_4s --copy-to public/3dmodels/model6_h19_antitorque.glb
+/Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_h19_glow.py
+python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/glow_trails/model6_h19_airflow_glow.glb --clip H19_Airflow_Glow_Loop_4s --copy-to public/3dmodels/
+```
 
 ### Marker7（実験用）：緑に発光する軌道の光跡エフェクト
 
