@@ -58,7 +58,13 @@ html, body {
   max-width: 100% !important;
   height: 100% !important;
   overflow: hidden !important;
+}
+/* 映像（z-index:-2）より手前に描かれる body は透明にし、映像の外側だけ html の黒を見せる */
+html {
   background: #000 !important;
+}
+body {
+  background: transparent !important;
 }
 #arjs-video {
   position: fixed !important;

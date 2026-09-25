@@ -228,7 +228,8 @@ function handleTap() {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: #000;
+  /* AR.js のカメラ映像は body 直下に z-index:-2 で置かれるため、ここを塗ると映像が隠れる */
+  background: transparent;
 }
 
 .marker-ar :deep(a-scene) {
