@@ -14,6 +14,9 @@ import ArContentExplanations from '@/components/ArContentExplanations.vue'
 import ArDebugPanel from '@/components/ArDebugPanel.vue'
 import ArHudHeader from '@/components/ArHudHeader.vue'
 import ArReticle from '@/components/ArReticle.vue'
+import ArViewportDebugOverlay, {
+  type MarkerEventLogEntry,
+} from '@/components/ArViewportDebugOverlay.vue'
 import { useDebugMode } from '@/composables/useDebugMode'
 import { useArStore } from '@/stores/ar'
 import { useContentTransformStore } from '@/stores/contentTransform'
@@ -47,9 +50,25 @@ function markerNameFromEvent(event: Event): string | null {
   return target?.dataset.markerName ?? null
 }
 
+/**
+ * 不具合2（1枚目に反応後、別マーカーに反応しない）の実機診断用ログ。
+ * ?debug=true のときだけ ArViewportDebugOverlay に渡して表示する。
+ * store が正しく更新されているか、そもそも AR.js から markerFound/markerLost が
+ * 発火しているか自体を実機のスクショから切り分けられるようにする。
+ */
+const debugEvents = ref<MarkerEventLogEntry[]>([])
+const DEBUG_EVENT_LOG_MAX = 12
+
+function pushDebugEvent(type: MarkerEventLogEntry['type'], marker: string) {
+  if (!isDebug.value) return
+  const time = new Date().toLocaleTimeString('ja-JP', { hour12: false })
+  debugEvents.value = [...debugEvents.value, { time, type, marker }].slice(-DEBUG_EVENT_LOG_MAX)
+}
+
 function handleMarkerFound(event: Event) {
   const name = markerNameFromEvent(event)
   if (!name) return
+  pushDebugEvent('markerFound', name)
   arStore.onImageFound(name)
   // sound.ts 側の REPLAY_GUARD_MS で連打を防いでいるため、CameraView と同じく無条件に呼ぶ
   playFoundSound()
@@ -58,6 +77,7 @@ function handleMarkerFound(event: Event) {
 function handleMarkerLost(event: Event) {
   const name = markerNameFromEvent(event)
   if (!name) return
+  pushDebugEvent('markerLost', name)
   arStore.onImageLost(name)
 }
 
@@ -196,6 +216,9 @@ function handleTap() {
       :active-marker="arStore.activeMarker"
       @close="panelOpen = false"
     />
+
+    <!-- 実機診断オーバーレイ（?debug=true のときのみ）。不具合1・2の実機確認用 -->
+    <ArViewportDebugOverlay v-if="isDebug" :events="debugEvents" />
   </div>
 </template>
 

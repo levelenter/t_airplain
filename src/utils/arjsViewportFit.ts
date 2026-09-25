@@ -1,181 +1,100 @@
 /**
- * AR.js（@ar-js-org/ar.js 3.4.8 の aframe ビルド）は、カメラ映像用の `<video id="arjs-video">`
- * を `document.body` 直下に追加し、`arToolkitSource.onResizeElement()` で
- * `videoWidth/videoHeight` から計算した「cover 風」の width/height/margin を割り当てる。
- * 一方で a-scene の `<canvas class="a-canvas">` は 8-Frame（A-Frame）標準の CSS
- * （`.a-canvas { width:100%; height:100% }`）で常にビューポート全体にフィットする。
+ * AR.js（@ar-js-org/ar.js@3.4.8 の aframe ビルド）で iOS Safari 実機に出ていた
+ * 「画面の左側が黒帯のまま」の対策。
  *
- * この2つは別々の計算式でサイズが決まるため、
- * - iOS Safari では `window.innerWidth/innerHeight` を読むタイミング（SPA 遷移直後の
- *   初回や、アドレスバーの表示/非表示に伴うビューポート変化の最中）によって video 側の計算が
- *   実際のビューポートに追従しきれず、video が画面の一部しか覆わない（覆われない部分は
- *   背後の `.marker-ar` の黒背景がそのまま見える）ことがある。
- * - 仮に video が正しく画面を覆えたとしても、video と canvas のサイズ・位置が一致しなければ、
- *   ARToolKit のカメラ投影（video の実ピクセルを基準に計算される）と canvas の描画範囲がずれ、
- *   3D がマーカーの実際の位置から浮いて見える。
+ * 根拠（CDN から取得した aframe-ar.js 3.4.8 の実コードを読んで特定した）:
  *
- * これを避けるため、video の実サイズ（videoWidth/videoHeight）から「画面を確実に覆い切る
- * cover」矩形を自前で計算し、video と canvas の両方に同一の position/width/height/left/top を
- * 強制する。
+ * 1. `ArToolkitSource.prototype.copyElementSizeTo` は、縦持ち（window.innerWidth <=
+ *    window.innerHeight）のとき、コピー先要素の style.width を
+ *    `4 * parseInt(style.height) / 3` という「4:3 決め打ち」の値にし、
+ *    style.marginLeft を `(window.innerWidth - width) / 2` にする。
+ * 2. AR.js の "arjs" システムは `renderstart` 内で
+ *    `window.addEventListener('resize', () => arSource.copyElementSizeTo(document.body))`
+ *    を登録している。つまり **video 要素ではなく `document.body` 自身の width/marginLeft を
+ *    window の resize のたびに書き換えている**。
+ * 3. 縦持ちの iPhone では video の高さ（≒ innerHeight 相当、数百〜千px）に対して
+ *    4/3 倍した width が innerWidth を大きく超えるため、marginLeft は大きな負値になる。
+ *    body の実体幅は innerWidth よりずっと広くなり、marginLeft 分だけ左にずれるため、
+ *    body の中身（#app 以下、.marker-ar 全体）も一緒に左へシフトする。
+ *    100vw/100dvh は「viewport 基準」なので大きさ自体は変わらないが、開始位置（left）が
+ *    body の実際の描画開始位置に引きずられるため、画面の一部（多くは左側）に
+ *    body の外側の背景がはみ出して見える＝黒帯、という現象になる。
+ * 4. さらに `ArToolkitSource.prototype.onResizeElement` は video 自身の
+ *    style.width/height/marginLeft/marginTop を、window の resize やソース準備完了ごとに
+ *    書き換え続ける。video は object-fit を指定していないため、初期値の `fill`
+ *    （縦横比を無視して引き伸ばし）になる。
  *
- * 注意: AR.js は `window` の resize イベントや video の準備完了時に、自前の（今回のバグの原因になった）
- * 計算式で video 側の style（特に marginLeft）を こちらの適用より後に書き換えることがある
- * （こちらは `style.left` で位置決めしつつ `margin` を 0 にしているのに、AR.js が `marginLeft` だけを
- * 独自の値で上書きし、結果 left と marginLeft が二重に効いて video がさらに大きくずれる、という
- * 事象を実機確認で検出した）。タイミングに依存せず必ずこちらの計算を勝たせるため、
- * video/canvas の `style` 属性を MutationObserver で監視し、期待値と異なれば即座に上書きし直す。
+ * 前回（MutationObserver で video/canvas の style を都度上書きし返す実装）は、
+ * この (2) の「body 自体が動かされる」経路にまったく対応していなかった。
+ * そのため実機の黒帯が直らなかったと考えられる。
+ *
+ * 対策方針:
+ * - JS 側のタイミング競争（MutationObserver での上書き合戦）はやめる。
+ *   CSS の `!important` は常に通常の inline style に勝つため、AR.js が
+ *   何度 body/video に inline style を書き込んでも、スタイルシートで固定した
+ *   値が最終結果になる。これなら実行タイミングに依存しない。
+ * - body/html を 100% 固定し、AR.js の `copyElementSizeTo(document.body)` による
+ *   width/marginLeft の書き換えを無効化する。
+ * - video は `position:fixed; inset:0` と `object-fit:cover` で強制的に画面全体を覆う。
+ *   object-fit:cover はブラウザが実際の videoWidth/videoHeight を見て計算するため、
+ *   AR.js 自身の（4:3 決め打ちのような）計算が誤っていても影響を受けない。
+ * - a-scene の canvas は AR.js 側では触られない
+ *   （A-Frame が canvas に `dataset.aframeCanvas = true` を立てており、
+ *   copyElementSizeTo 系の呼び出しはこのフラグを見て canvas をスキップする実装になっている）。
+ *   したがって canvas 側は MarkerArView.vue の scoped CSS（`.marker-ar :deep(a-scene)`が
+ *   position:absolute; inset:0; width/height:100% にしている）のままで問題ない。
+ *   video の可視範囲と canvas の投影が一致する条件（video が常にビューポート全体を覆う）は
+ *   この対策で満たされる。
  */
 
-interface Teardown {
-  (): void
-}
+const STYLE_ID = 'arjs-viewport-fit-style'
 
-const VIDEO_ID = 'arjs-video'
-
-interface Rect {
-  width: number
-  height: number
-  left: number
-  top: number
+const CSS = `
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: #000 !important;
 }
-
-function computeCoverRect(vw: number, vh: number, viewportW: number, viewportH: number): Rect | null {
-  if (!vw || !vh || !viewportW || !viewportH) return null
-  // 画面の縦横どちらも確実に覆い切るスケール（CSS の background-size:cover と同じ考え方）。
-  const scale = Math.max(viewportW / vw, viewportH / vh)
-  const width = vw * scale
-  const height = vh * scale
-  return {
-    width,
-    height,
-    left: (viewportW - width) / 2,
-    top: (viewportH - height) / 2,
-  }
+#arjs-video {
+  position: fixed !important;
+  inset: 0 !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: cover !important;
+  object-position: center !important;
 }
-
-function px(n: number): string {
-  return `${n}px`
-}
-
-/** el のインラインスタイルが rect と既に一致していれば true（MutationObserver の無限ループ防止用） */
-function matchesRect(el: HTMLElement, rect: Rect): boolean {
-  return (
-    el.style.position === 'fixed' &&
-    el.style.width === px(rect.width) &&
-    el.style.height === px(rect.height) &&
-    el.style.left === px(rect.left) &&
-    el.style.top === px(rect.top) &&
-    el.style.marginLeft === '0px' &&
-    el.style.marginTop === '0px' &&
-    el.style.marginRight === '0px' &&
-    el.style.marginBottom === '0px'
-  )
-}
-
-function applyRect(el: HTMLElement, rect: Rect) {
-  if (matchesRect(el, rect)) return
-  el.style.position = 'fixed'
-  el.style.width = px(rect.width)
-  el.style.height = px(rect.height)
-  el.style.left = px(rect.left)
-  el.style.top = px(rect.top)
-  el.style.right = 'auto'
-  el.style.bottom = 'auto'
-  // margin は longhand で個別に 0 固定する（AR.js が marginLeft だけを独自に書き換えても
-  // 次の MutationObserver 発火で即座に打ち消せるようにするため）。
-  el.style.marginLeft = '0px'
-  el.style.marginTop = '0px'
-  el.style.marginRight = '0px'
-  el.style.marginBottom = '0px'
-}
+`
 
 /**
- * MarkerArView のマウント中、video/canvas のサイズを継続的に強制する。
- * 戻り値の関数を呼ぶとイベント購読を止める（マーカー画面のアンマウント時に呼ぶこと）。
+ * MarkerArView のマウント中、body/#arjs-video の全画面フィットを CSS で強制する。
+ * 戻り値の関数を呼ぶとスタイルを取り除く（マーカー画面のアンマウント時に呼ぶこと）。
  */
-export function setupArjsViewportFit(sceneEl: HTMLElement): Teardown {
-  let video: HTMLVideoElement | null = null
-  let canvas: HTMLCanvasElement | null = null
-  let rafId: number | null = null
-
-  function getCanvas(): HTMLCanvasElement | null {
-    return sceneEl.querySelector<HTMLCanvasElement>('canvas.a-canvas')
+export function setupArjsViewportFit(_sceneEl: HTMLElement): () => void {
+  const existing = document.getElementById(STYLE_ID)
+  if (existing) {
+    // 既に別インスタンスが挿入済み（前回表示分の後始末漏れなど）。そのまま使う。
+    return () => {}
   }
 
-  function apply() {
-    if (!video || !video.videoWidth || !video.videoHeight) return
-    canvas = canvas ?? getCanvas()
-    if (!canvas) return
-    const rect = computeCoverRect(video.videoWidth, video.videoHeight, window.innerWidth, window.innerHeight)
-    if (!rect) return
-    // applyRect は既に目標値と一致していれば書き込まない（matchesRect）ため、
-    // ここで書いた分が MutationObserver を再度起こしても、次の apply() は no-op で収束する
-    // （AR.js 側が別の値に書き換えない限り、無限ループにはならない）。
-    applyRect(video, rect)
-    applyRect(canvas, rect)
-  }
-
-  function scheduleApply() {
-    if (rafId !== null) return
-    rafId = requestAnimationFrame(() => {
-      rafId = null
-      apply()
-    })
-  }
-
-  // AR.js（や A-Frame の a-canvas CSS）が video/canvas の style を書き換えるたびに検知し、
-  // こちらの計算値で即座に上書きし直す。タイミングに依存しない「必ず最後に勝つ」対策。
-  const styleObserver = new MutationObserver(() => {
-    scheduleApply()
-  })
-
-  function observe(el: Element | null) {
-    if (!el) return
-    styleObserver.observe(el, { attributes: true, attributeFilter: ['style'] })
-  }
-
-  function onVideoLoaded(event: Event) {
-    const detail = (event as CustomEvent<{ component?: HTMLVideoElement }>).detail
-    video = detail?.component ?? (document.getElementById(VIDEO_ID) as HTMLVideoElement | null)
-    if (!video) return
-    observe(video)
-    canvas = getCanvas()
-    observe(canvas)
-    if (video.readyState >= 1) {
-      scheduleApply()
-    } else {
-      video.addEventListener('loadedmetadata', scheduleApply, { once: true })
-    }
-    // iOS Safari はアドレスバーの表示/非表示等でビューポートが遅れて確定することがあるため、
-    // 初回はしばらく追従させる（MutationObserver に加えた保険）。
-    for (const delay of [50, 150, 300, 600, 1000, 1600]) {
-      setTimeout(scheduleApply, delay)
-    }
-  }
-
-  function onResize() {
-    scheduleApply()
-  }
-
-  window.addEventListener('arjs-video-loaded', onVideoLoaded)
-  window.addEventListener('resize', onResize)
-  window.addEventListener('orientationchange', onResize)
-
-  // 既に video-loaded が発火済みでこの後にマウントされた場合（前回表示分の使い回し）のフォールバック
-  const existingVideo = document.getElementById(VIDEO_ID) as HTMLVideoElement | null
-  if (existingVideo) {
-    video = existingVideo
-    observe(video)
-    canvas = getCanvas()
-    observe(canvas)
-    scheduleApply()
-  }
+  const style = document.createElement('style')
+  style.id = STYLE_ID
+  style.textContent = CSS
+  document.head.appendChild(style)
 
   return function teardown() {
-    window.removeEventListener('arjs-video-loaded', onVideoLoaded)
-    window.removeEventListener('resize', onResize)
-    window.removeEventListener('orientationchange', onResize)
-    styleObserver.disconnect()
-    if (rafId !== null) cancelAnimationFrame(rafId)
+    document.getElementById(STYLE_ID)?.remove()
   }
 }
