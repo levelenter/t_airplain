@@ -6,6 +6,13 @@ import type { InjectionKey } from 'vue'
  */
 export const AR_PREVIEW_KEY: InjectionKey<boolean> = Symbol('arPreview')
 
+/**
+ * AR.js（pattern マーカー）画面かどうかを ArContent に伝える provide/inject キー。
+ * MarkerArView が true を provide し、ArContent はマーカー追従要素を
+ * `<a-marker type="pattern">`（src/utils/markerAr.ts の .patt を参照）に差し替える。
+ */
+export const AR_MARKER_AR_KEY: InjectionKey<boolean> = Symbol('arMarkerAr')
+
 /** image-target-cli が生成する JSON のうち、プレビューで使う部分 */
 export interface ImageTargetMeta {
   name: string

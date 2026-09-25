@@ -19,6 +19,12 @@ function start() {
 function openPreview() {
   router.push({ name: 'preview' })
 }
+
+/** 番号入りマーカー（01〜06）を AR.js で認識する画面へ */
+function openMarkerAr() {
+  unlockAudio()
+  router.push({ name: 'marker-ar' })
+}
 </script>
 
 <template>
@@ -31,7 +37,10 @@ function openPreview() {
         航空機にまつわるARコンテンツが現れます。
       </p>
 
-      <button class="start__button" type="button" @click="start">スタート</button>
+      <div class="start__actions">
+        <button class="start__button" type="button" @click="start">画像マーカーでスタート</button>
+        <button class="start__button" type="button" @click="openMarkerAr">番号マーカーでスタート</button>
+      </div>
 
       <section class="start__markers">
         <h2>体験できるコンテンツ</h2>
@@ -83,10 +92,17 @@ function openPreview() {
   opacity: 0.9;
 }
 
-.start__button {
+.start__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
   margin: 24px 0;
-  padding: 14px 64px;
-  font-size: 1.1rem;
+}
+
+.start__button {
+  flex: 1;
+  padding: 14px 12px;
+  font-size: 1rem;
   font-weight: bold;
   color: #0b1e3f;
   background: #ffd54f;

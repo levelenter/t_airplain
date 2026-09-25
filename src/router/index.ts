@@ -21,6 +21,12 @@ const router = createRouter({
       // PC でマーカー上の AR コンテンツを確認するローカルプレビュー（カメラ・XR8 不要）
       component: () => import('@/pages/PreviewView.vue'),
     },
+    {
+      path: '/marker-ar',
+      name: 'marker-ar',
+      // 8th Wall とは別に、AR.js（pattern マーカー）で番号入りマーカー（01〜06）を認識する画面
+      component: () => import('@/pages/MarkerArView.vue'),
+    },
   ],
 })
 

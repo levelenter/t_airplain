@@ -5,7 +5,8 @@
  * 階層は次の通り。自動回転をユーザー指定の向きと別の階層に分けることで、
  * rotation を指定したまま回転させても互いに干渉しない。
  *
- *   named-image-target        マーカー追従（開発用プレビュー時は素の a-entity）
+ *   named-image-target        マーカー追従（開発用プレビュー時は素の a-entity、
+ *                             AR.js 画面では a-marker[type=pattern]）
  *     └ visible               タップされるまで隠す
  *         ├ position/rotation/scale   ← 調整パネルの対象
  *         │   └ auto-spin             ← Y 軸の自動回転
@@ -15,8 +16,9 @@
  *                                     独立した層に置き、各 ContentsN.vue 側の定数で調整する
  */
 import { computed, inject } from 'vue'
-import { AR_PREVIEW_KEY } from '@/utils/arPreview'
+import { AR_MARKER_AR_KEY, AR_PREVIEW_KEY } from '@/utils/arPreview'
 import { type ContentTransform, toScaleAttr, toVec3Attr } from '@/utils/contentTransform'
+import { markerArPatternUrl } from '@/utils/markerAr'
 
 const props = defineProps<{
   markerName: string
@@ -34,7 +36,21 @@ const props = defineProps<{
  * マーカー追従の要素を素の a-entity に差し替えて原点に固定表示する。
  */
 const isPreview = inject(AR_PREVIEW_KEY, false)
-const rootTag = computed(() => (isPreview ? 'a-entity' : 'xrextras-named-image-target'))
+const isMarkerAr = inject(AR_MARKER_AR_KEY, false)
+const rootTag = computed(() => {
+  if (isMarkerAr) return 'a-marker'
+  return isPreview ? 'a-entity' : 'xrextras-named-image-target'
+})
+/**
+ * AR.js の pattern マーカー用属性。patternRatio は marker_0N.patt 生成時の実測値（0.5）と
+ * 一致するデフォルトのまま使う。data-marker-name は MarkerArView が markerFound/markerLost
+ * イベント（a-scene まで bubble する）から、どのマーカーが動いたかを判定するために使う。
+ */
+const markerArAttrs = computed(() =>
+  isMarkerAr
+    ? { type: 'pattern', url: markerArPatternUrl(props.markerName), 'data-marker-name': props.markerName }
+    : {},
+)
 
 const positionAttr = computed(() => toVec3Attr(props.transform.position))
 const rotationAttr = computed(() => toVec3Attr(props.transform.rotation))
@@ -43,7 +59,11 @@ const autoSpinAttr = computed(() => `enabled: ${props.transform.autoRotate}; spe
 </script>
 
 <template>
-  <component :is="rootTag" :name="isPreview ? undefined : markerName">
+  <component
+    :is="rootTag"
+    :name="!isPreview && !isMarkerAr ? markerName : undefined"
+    v-bind="markerArAttrs"
+  >
     <a-entity :visible="active ? 'true' : 'false'">
       <a-entity :position="positionAttr" :rotation="rotationAttr" :scale="scaleAttr">
         <a-entity :auto-spin="autoSpinAttr">
