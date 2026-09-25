@@ -13,8 +13,9 @@ blending at runtime. Default style is straight: static axis-parallel ribbons car
 stationary shock diamonds, and short bright streaks physically travel downstream (per-frame location keys,
 fading at both ends so the wrap is invisible). --style helix swaps in the screw illusion (spinning helices).
 
-Options (all optional). Defaults are the tuned Marker3 look: cylinder style, blue-white only, full afterburner
-intensity, 2-second loop. Only the engine frame (--axis/--exit/--center/--exit-radius) normally needs changing.
+Options (all optional). Defaults are the FIXED Marker3 look (2026-09-17): cylinder style, blue-white only, full
+afterburner intensity, candle-tapered helix core + streaks, straight shimmer, 0.5-second loop at 60 fps.
+Only the engine frame (--axis/--exit/--center/--exit-radius) normally needs changing.
   --out PATH            output GLB (default ./afterburner.glb next to this script)
   --axis X|Y|Z          exhaust axis; flow goes toward the positive direction (default X)
   --exit F              axial coordinate of the nozzle exit plane (default 7.7)
@@ -40,7 +41,8 @@ intensity, 2-second loop. Only the engine frame (--axis/--exit/--center/--exit-r
   --haze R,G,B --haze-deep R,G,B                    outer plume colours
   --core-count N --haze-count N                     trail counts (default 24 main + 16 faint + 14 streak; 14)
   --turns N             core spin turns per loop, integer (default 4; haze spins 2, nozzle 1)
-  --seconds F           loop length (default 2 = fast, full-power feel; 4 for a calmer plume) --fps N --seed N
+  --seconds F --fps N   loop length and frame rate (default 0.5 s at 60 fps = 31 frames, full-power feel;
+                        2 s at 30 fps for a calmer plume) --seed N
   --scale-widths F      multiply all ribbon widths (default 1.2). Raise if the plume looks thin
                         after the AR scale is applied; lower if it blooms into a blob
   --style cylinder|straight|helix
@@ -73,7 +75,7 @@ def parse():
       'core':'0.45,0.72,1.0','core_hot':'0.92,0.96,1.0','core_deep':'0.15,0.35,1.0',
       'amber':'1.0,0.55,0.15','amber_hot':'1.0,0.88,0.55','amber_deep':'0.9,0.22,0.02',
       'haze':'0.25,0.5,1.0','haze_deep':'0.08,0.2,0.9',
-      'core_count':'24,16,14','haze_count':14,'turns':4,'seconds':2.0,'fps':30,'seed':33,'scale_widths':1.2,'nozzle_glow':0,'intensity':1.7,'style':'cylinder','streak_count':44,'haze_streaks':0,'turb_count':22,'shimmer_count':16,'body':'none','core_puffs':28}
+      'core_count':'24,16,14','haze_count':14,'turns':4,'seconds':0.5,'fps':60,'seed':33,'scale_widths':1.2,'nozzle_glow':0,'intensity':1.7,'style':'cylinder','streak_count':44,'haze_streaks':0,'turb_count':22,'shimmer_count':16,'body':'none','core_puffs':28}
  i=0
  while i<len(argv):
   key=argv[i].lstrip('-').replace('-','_');val=argv[i+1];cur=opt.get(key)

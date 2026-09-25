@@ -64,8 +64,10 @@ npm run dev          # http://localhost:5173
 - 動作確認: メニュー →「スタート」→ カメラ許可 → `public/marker/` のマーカー画像
   （`marker1_dbouble.jpeg` 〜 `marker5_helico.jpg`）を別画面に表示（または印刷）してかざすと、
   マーカーを認識 → タップを促す表示 → タップでコンテンツが現れる
-- 実機（スマホ）確認はカメラ利用のため HTTPS が必須。`npm run dev -- --host` で LAN 公開した上で
-  ngrok 等でトンネルするのが簡単: `ngrok http 5173`
+- dev サーバーは全インターフェース（`0.0.0.0:5173`）で待受するため（`vite.config.ts` の `server.host`）、
+  同じ LAN や VPN（WireGuard / Tailscale）の端末からは `http://<この Mac の IP>:5173/ar/preview` で開ける
+  （例: WireGuard 側 `http://10.255.25.185:5173/ar/preview`、Tailscale 側 `http://100.68.153.122:5173/ar/preview`）
+- 実機（スマホ）でカメラを使う場合は HTTPS が必須。ngrok 等でトンネルするのが簡単: `ngrok http 5173`
 - 画像マーカーの追加方法は `public/image-targets/README.md` を参照
   （`npx @8thwall/image-target-cli@latest` で生成 → `src/utils/markers.ts` に登録）
 
@@ -151,13 +153,13 @@ JSON の項目が欠けていたり値が壊れている場合は、その項目
   吸気口の前方から収束して吸い込まれるらせん状の光 22 本を X 軸まわりに 1 回転／4 秒で回します。
   クリップ `Jet_Intake_Glow_Loop_4s`。生成は `__dev/output/glow_trails/create_jet_intake_glow.py`。
 - `model3_jet_afterburner_glow.glb` … アフターバーナー。専用スキル **`.claude/skills/blender-afterburner/`** の**既定値そのまま**で生成します
-  （エンジン座標に `--seconds 0.5 --fps 60` を加えるだけ）。青白い炎だけで、静止した形状はなく、ループ 0.5 秒・60fps（スキル既定の 2 秒の 4 倍速）で勢いを出しています。
-  - 中心: 回転するらせんの束 54 本（4 回転／ループ）。出口では出口半径いっぱい、先端へ向かって蝋燭の炎のように
+  （エンジン座標だけ指定）。青白い炎だけで、静止した形状はなく、ループ 0.5 秒・60fps で勢いを出しています。この構成はスキルの確定版（2026-09-17）です。
+  - 中心: 回転するらせんの束 54 本（4 回転／ループ）。根元は出口半径の約 0.86 で光条の筒に接し、先端へ向かって蝋燭の炎のように
     一点へ細く収束する（`--core-taper candle`）。出口付近は白熱、下流ほど青く薄くなり、衝撃波ダイヤ 5 つは X 位置固定の明るい脈動。
     長さは全体の 2/3（`--core-length 0.667`）
-  - 光条: 短い明るい光条 44 本が出口から下流へ移動して両端でフェード。走行域は全体の 1.25 倍（`--tail-length 1.25`）にわたる
-    らせんと同じ炎型の円錐で、外側の光条ほど円錐が細くなる手前で消える
-  - 陽炎: 淡い波状リボン 16 本が円筒のすぐ外側を逆向き 2 群でゆっくり回り、輪郭が揺らめく（収束させない）。長さは 1.25 倍
+  - 光条: 短い明るい光条 44 本が出口半径の 0.9 倍の筒（`--tail-radius 0.9`）の中を出口から下流へ移動して両端でフェード。
+    走行域は全体の 1.25 倍（`--tail-length 1.25`）にわたるらせんと同じ炎型の円錐で、外側の光条ほど円錐が細くなる手前で消える
+  - 陽炎: 淡い波状リボン 16 本が光条の筒のすぐ外側を逆向き 2 群でゆっくり回り、輪郭が揺らめく（収束させない）。長さは 1.25 倍
   クリップ `Jet_Afterburner_Glow_Loop_05s`（約 4.0 MB）。
 
 `Contents3.vue` は 3 entity で、吸気と炎の entity にだけ `additive-glow` を付けます。
@@ -172,7 +174,7 @@ JSON の項目が欠けていたり値が壊れている場合は、その項目
 python3 __dev/output/glow_trails/finalize_airframe.py __dev/output/jet_afterburner/model3_jet_airframe.glb --clip Jet_Airflow_Loop_4s --copy-to public/3dmodels/model3_jet_airflow.glb --forbid Exhaust --forbid "Plume envelope" --forbid "moving streak"
 /Applications/Blender.app/Contents/MacOS/Blender -b --python __dev/output/glow_trails/create_jet_intake_glow.py
 python3 .claude/skills/blender-orbit-glow/scripts/finalize_glb.py __dev/output/glow_trails/model3_jet_intake_glow.glb --clip Jet_Intake_Glow_Loop_4s --copy-to public/3dmodels/
-/Applications/Blender.app/Contents/MacOS/Blender -b --python .claude/skills/blender-afterburner/scripts/create_afterburner.py -- --out __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --axis X --exit 7.7 --center 0,2 --exit-radius 1.22 --seconds 0.5 --fps 60
+/Applications/Blender.app/Contents/MacOS/Blender -b --python .claude/skills/blender-afterburner/scripts/create_afterburner.py -- --out __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --axis X --exit 7.7 --center 0,2 --exit-radius 1.22
 python3 .claude/skills/blender-afterburner/scripts/finalize_glb.py __dev/output/jet_afterburner/model3_jet_afterburner_glow.glb --clip Jet_Afterburner_Glow_Loop_05s --copy-to public/3dmodels/
 node .claude/skills/blender-afterburner/scripts/shot_preview.mjs . public/3dmodels/model3_jet_afterburner_glow.glb __dev/output/jet_afterburner 13,0,2 16 0.05 0.25
 ```

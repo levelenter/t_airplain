@@ -10,7 +10,9 @@
  *         ├ position/rotation/scale   ← 調整パネルの対象
  *         │   └ auto-spin             ← Y 軸の自動回転
  *         │       └ slot（モデル本体）
- *         └ a-text                    ラベル（倍率の影響を受けないよう外に置く）
+ *         ├ a-text                    ラベル（倍率の影響を受けないよう外に置く）
+ *         └ slot「hud」               解説パネルなど。モデルの位置調整の影響を受けない
+ *                                     独立した層に置き、各 ContentsN.vue 側の定数で調整する
  */
 import { computed, inject } from 'vue'
 import { AR_PREVIEW_KEY } from '@/utils/arPreview'
@@ -23,6 +25,8 @@ const props = defineProps<{
   transform: ContentTransform
   /** モデル上に出す英字ラベル（A-Frame のフォントは日本語グリフ非対応） */
   label: string
+  /** ラベルの位置（"x y z"）。モデルに隠れる場合に各 ContentsN.vue から前に出す */
+  labelPosition?: string
 }>()
 
 /**
@@ -50,11 +54,13 @@ const autoSpinAttr = computed(() => `enabled: ${props.transform.autoRotate}; spe
       <a-text
         v-if="label"
         :value="label"
-        position="0 0.7 0"
+        :position="labelPosition ?? '0 0.7 0'"
         align="center"
         color="#ffffff"
         width="2.4"
       ></a-text>
+
+      <slot name="hud" />
     </a-entity>
   </component>
 </template>

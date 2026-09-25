@@ -27,6 +27,9 @@ export default defineConfig({
     },
   },
   server: {
+    // VPN（WireGuard / Tailscale）や LAN の端末から HTTP でアクセスできるよう全インターフェースで待受する
+    host: '0.0.0.0',
+    port: 5173,
     // ngrok トンネル経由でのスマホ実機確認を許可する（サブドメインはセッションごとに変わる）
     allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.app', '.ngrok.dev'],
   },
