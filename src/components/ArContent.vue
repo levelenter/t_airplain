@@ -8,12 +8,23 @@
  *   named-image-target        マーカー追従（開発用プレビュー時は素の a-entity、
  *                             AR.js 画面では a-marker[type=pattern]）
  *     └ visible               タップされるまで隠す
- *         ├ position/rotation/scale   ← 調整パネルの対象
- *         │   └ auto-spin             ← Y 軸の自動回転
- *         │       └ slot（モデル本体）
- *         ├ a-text                    ラベル（倍率の影響を受けないよう外に置く）
- *         └ slot「hud」               解説パネルなど。モデルの位置調整の影響を受けない
- *                                     独立した層に置き、各 ContentsN.vue 側の定数で調整する
+ *         └ axis-correction   AR.js 画面でだけ rotation="-90 0 0"（8th Wall/プレビューでは無回転）
+ *             ├ position/rotation/scale   ← 調整パネルの対象
+ *             │   └ auto-spin             ← Y 軸の自動回転
+ *             │       └ slot（モデル本体）
+ *             ├ a-text                    ラベル（倍率の影響を受けないよう外に置く）
+ *             └ slot「hud」               解説パネルなど。モデルの位置調整の影響を受けない
+ *                                         独立した層に置き、各 ContentsN.vue 側の定数で調整する
+ *
+ * axis-correction（AR.js 版だけ rotation="-90 0 0"）について:
+ * ContentsN.vue は 8th Wall の画像ターゲット座標系（画像平面が XY、+Y が画像の上、
+ * +Z が画像から外向き＝カメラ側）を前提に position/rotation/label/hud を調整している。
+ * 一方 AR.js の <a-marker> 直下の座標系は、マーカー平面が XZ、+Y がマーカーから外向き
+ * （ARToolKit の modelViewMatrix に AR.js が内部で rotateX(+90°) を掛けて得られる軸）になる。
+ * このずれを吸収するため、AR.js 画面でだけ内側を rotation="-90 0 0" で包む。
+ * X 軸 -90° 回転はコンテンツの +Y（画像の上）→ マーカー座標の -Z、
+ * コンテンツの +Z（画像から外向き）→ マーカー座標の +Y（マーカーから外向き）に写す。
+ * 結果として、壁に垂直に貼ったマーカーでも機体は正立し、+Y が壁の外向き（手前）を向く。
  */
 import { computed, inject } from 'vue'
 import { AR_MARKER_AR_KEY, AR_PREVIEW_KEY } from '@/utils/arPreview'
@@ -43,12 +54,30 @@ const rootTag = computed(() => {
 })
 /**
  * AR.js の pattern マーカー用属性。patternRatio は marker_0N.patt 生成時の実測値（0.5）と
- * 一致するデフォルトのまま使う。data-marker-name は MarkerArView が markerFound/markerLost
- * イベント（a-scene まで bubble する）から、どのマーカーが動いたかを判定するために使う。
+ * 一致するデフォルトのまま使う（arjs システム側の既定値、ここでは指定しない）。
+ * data-marker-name は MarkerArView が markerFound/markerLost イベント（a-scene まで bubble する）
+ * から、どのマーカーが動いたかを判定するために使う。
+ *
+ * smooth 系はモデルのちらつき対策。AR.js の a-marker は既定で smooth が無効
+ * （@ar-js-org/ar.js 3.4.8 の arjs-anchor コンポーネント既定値: smooth:false）で、
+ * 認識のたびに生の変換行列をそのまま反映するため、わずかなノイズでもモデルが揺れて見える。
+ * smooth を有効にし、直近フレームの変換行列を平均化させることで揺れを抑える
+ * （smoothCount: 平均するフレーム数、smoothTolerance: 無視する位置変化のしきい値、
+ *   smoothThreshold: 大きな変化を反映するまでに要する連続フレーム数）。
+ * 既定値 smoothCount:5 / smoothTolerance:.01 / smoothThreshold:2 よりやや強めにして、
+ * 反応の速さとの兼ね合いでちらつきを優先的に抑える。
  */
 const markerArAttrs = computed(() =>
   isMarkerAr
-    ? { type: 'pattern', url: markerArPatternUrl(props.markerName), 'data-marker-name': props.markerName }
+    ? {
+        type: 'pattern',
+        url: markerArPatternUrl(props.markerName),
+        'data-marker-name': props.markerName,
+        smooth: 'true',
+        'smooth-count': '10',
+        'smooth-tolerance': '0.01',
+        'smooth-threshold': '5',
+      }
     : {},
 )
 
@@ -56,6 +85,9 @@ const positionAttr = computed(() => toVec3Attr(props.transform.position))
 const rotationAttr = computed(() => toVec3Attr(props.transform.rotation))
 const scaleAttr = computed(() => toScaleAttr(props.transform.scale))
 const autoSpinAttr = computed(() => `enabled: ${props.transform.autoRotate}; speed: 30`)
+
+/** AR.js 画面（a-marker 座標系）でだけ軸のずれを補正する。8th Wall/プレビューでは無回転 */
+const axisCorrectionAttr = computed(() => (isMarkerAr ? '-90 0 0' : '0 0 0'))
 </script>
 
 <template>
@@ -65,22 +97,24 @@ const autoSpinAttr = computed(() => `enabled: ${props.transform.autoRotate}; spe
     v-bind="markerArAttrs"
   >
     <a-entity :visible="active ? 'true' : 'false'">
-      <a-entity :position="positionAttr" :rotation="rotationAttr" :scale="scaleAttr">
-        <a-entity :auto-spin="autoSpinAttr">
-          <slot />
+      <a-entity :rotation="axisCorrectionAttr">
+        <a-entity :position="positionAttr" :rotation="rotationAttr" :scale="scaleAttr">
+          <a-entity :auto-spin="autoSpinAttr">
+            <slot />
+          </a-entity>
         </a-entity>
+
+        <a-text
+          v-if="label"
+          :value="label"
+          :position="labelPosition ?? '0 0.7 0'"
+          align="center"
+          color="#ffffff"
+          width="2.4"
+        ></a-text>
+
+        <slot name="hud" />
       </a-entity>
-
-      <a-text
-        v-if="label"
-        :value="label"
-        :position="labelPosition ?? '0 0.7 0'"
-        align="center"
-        color="#ffffff"
-        width="2.4"
-      ></a-text>
-
-      <slot name="hud" />
     </a-entity>
   </component>
 </template>

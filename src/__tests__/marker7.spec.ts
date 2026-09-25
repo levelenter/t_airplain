@@ -23,6 +23,9 @@ it('registers the independent wind study, target resources and adjustable placem
     expect(existsSync(resolve('public/image-targets', String(resource)))).toBe(true)
   }
   const ar = useArStore()
+  // marker_7 は previewOnly のため既定の markerSource（AR_MARKERS）には含まれない。
+  // ここではプレビュー用途を想定し、全マーカー一覧に差し替えてから解決させる。
+  ar.setMarkerSource(MARKERS)
   ar.onImageFound('marker_7')
   expect(ar.pendingMarker?.contentId).toBe(7)
   ar.activate('marker_7')

@@ -6,16 +6,14 @@
  * 別の仕組み・別名前空間で、同じ Contents1〜6（3D モデル・エフェクト）を表示する。
  * 生成手順は `public/ar-patterns/README.md` を参照。
  */
-export interface MarkerArDefinition {
-  /** マーカー名。ArContent がこの名前から .patt の URL を組み立てる */
-  name: string
-  /** HUD に表示する日本語タイトル */
-  title: string
-  /** 対応するコンテンツ番号（pages/Contents1〜6.vue） */
-  contentId: 1 | 2 | 3 | 4 | 5 | 6
-}
+import type { MarkerDefinition } from './markers'
 
-export const MARKER_AR_MARKERS: MarkerArDefinition[] = [
+/**
+ * AR.js 側のマーカー定義は src/utils/markers.ts の MarkerDefinition と同じ形にしておく
+ * （name / title / contentId）。こうすることで src/stores/ar.ts の useArStore を
+ * 8th Wall・AR.js の両画面でそのまま共有できる（setMarkerSource で一覧だけ差し替える）。
+ */
+export const MARKER_AR_MARKERS: MarkerDefinition[] = [
   { name: 'marker_01', title: 'T-1Bの「鼻」のひみつ', contentId: 1 },
   { name: 'marker_02', title: 'T-6G 主翼のひみつ', contentId: 2 },
   { name: 'marker_03', title: 'ジェットエンジン', contentId: 3 },
