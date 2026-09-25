@@ -21,9 +21,9 @@ import { registerAdditiveGlow } from '@/utils/aframeAdditiveGlow'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
 import { AR_MARKER_AR_KEY } from '@/utils/arPreview'
+import { setupArjsViewportFit } from '@/utils/arjsViewportFit'
 import { loadArjs } from '@/utils/loadArjs'
 import { MARKER_AR_MARKERS } from '@/utils/markerAr'
-import { createMarkerLostHysteresis } from '@/utils/markerLostHysteresis'
 import { playFoundSound, playTapSound } from '@/utils/sound'
 import { CONTENT_COMPONENTS } from './contentComponents'
 
@@ -40,23 +40,16 @@ const panelOpen = ref(false)
 const ready = ref(false)
 const loadError = ref<string | null>(null)
 const sceneRef = useTemplateRef<HTMLElement>('scene')
+let disposeViewportFit: (() => void) | null = null
 
 function markerNameFromEvent(event: Event): string | null {
   const target = event.target as HTMLElement | null
   return target?.dataset.markerName ?? null
 }
 
-/**
- * AR.js の markerFound/markerLost は 1〜2 フレームのノイズでばたつくことがあるため、
- * markerLost はすぐに反映せず、猶予時間内に同名の markerFound が来なければ
- * ロスト確定にする（モデル自体のちらつきは ArContent 側の a-marker smooth オプションで抑える）。
- */
-const lostHysteresis = createMarkerLostHysteresis((name) => arStore.onImageLost(name))
-
 function handleMarkerFound(event: Event) {
   const name = markerNameFromEvent(event)
   if (!name) return
-  lostHysteresis.found(name)
   arStore.onImageFound(name)
   // sound.ts 側の REPLAY_GUARD_MS で連打を防いでいるため、CameraView と同じく無条件に呼ぶ
   playFoundSound()
@@ -65,7 +58,7 @@ function handleMarkerFound(event: Event) {
 function handleMarkerLost(event: Event) {
   const name = markerNameFromEvent(event)
   if (!name) return
-  lostHysteresis.lost(name)
+  arStore.onImageLost(name)
 }
 
 onMounted(async () => {
@@ -88,13 +81,14 @@ onMounted(async () => {
   requestAnimationFrame(() => {
     sceneRef.value?.addEventListener('markerFound', handleMarkerFound)
     sceneRef.value?.addEventListener('markerLost', handleMarkerLost)
+    if (sceneRef.value) disposeViewportFit = setupArjsViewportFit(sceneRef.value)
   })
 })
 
 onBeforeUnmount(() => {
   sceneRef.value?.removeEventListener('markerFound', handleMarkerFound)
   sceneRef.value?.removeEventListener('markerLost', handleMarkerLost)
-  lostHysteresis.dispose()
+  disposeViewportFit?.()
 })
 
 function goBack() {
@@ -130,12 +124,13 @@ function handleTap() {
 <template>
   <div class="marker-ar">
     <!--
-      ちらつき対策（モデル自体のジッター対策は各 ContentsN が使う ArContent 側の a-marker
-      smooth/smoothCount/smoothTolerance/smoothThreshold で行う。ここではシステム全体の設定）:
+      ちらつき対策:
       - debugUIEnabled: false … デバッグ用キャンバスを出さない（描画負荷と視覚ノイズを減らす）
       - detectionMode: mono … pattern マーカーのみ使うため二値化のみで十分（matrix/NFT 不要）
       - renderer: antialias / logarithmicDepthBuffer … エッジのジャギーと、モデルとグロー（加算合成）
         の重なりで起きうる z-fighting 由来のちらつきを軽減する
+      smooth 系や markerLost のヒステリシスは使わない。フレームの平均化・遅延はモデルの反応を
+      遅らせ、実機ではむしろ3Dがマーカーの位置からずれて見える原因になる。
     -->
     <a-scene
       v-if="ready"

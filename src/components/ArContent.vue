@@ -58,14 +58,10 @@ const rootTag = computed(() => {
  * data-marker-name は MarkerArView が markerFound/markerLost イベント（a-scene まで bubble する）
  * から、どのマーカーが動いたかを判定するために使う。
  *
- * smooth 系はモデルのちらつき対策。AR.js の a-marker は既定で smooth が無効
- * （@ar-js-org/ar.js 3.4.8 の arjs-anchor コンポーネント既定値: smooth:false）で、
- * 認識のたびに生の変換行列をそのまま反映するため、わずかなノイズでもモデルが揺れて見える。
- * smooth を有効にし、直近フレームの変換行列を平均化させることで揺れを抑える
- * （smoothCount: 平均するフレーム数、smoothTolerance: 無視する位置変化のしきい値、
- *   smoothThreshold: 大きな変化を反映するまでに要する連続フレーム数）。
- * 既定値 smoothCount:5 / smoothTolerance:.01 / smoothThreshold:2 よりやや強めにして、
- * 反応の速さとの兼ね合いでちらつきを優先的に抑える。
+ * smooth（smooth-count/smooth-tolerance/smooth-threshold）は使わない。直近フレームの変換行列を
+ * 平均化する分だけ反映が遅れ、実機ではカメラや端末が動くたびに3Dがマーカーの位置から
+ * 目に見えてずれる。ちらつき対策は a-scene 側の renderer（antialias/logarithmicDepthBuffer）で
+ * 十分なため、ここでは生の変換行列をそのまま使う。
  */
 const markerArAttrs = computed(() =>
   isMarkerAr
@@ -73,10 +69,6 @@ const markerArAttrs = computed(() =>
         type: 'pattern',
         url: markerArPatternUrl(props.markerName),
         'data-marker-name': props.markerName,
-        smooth: 'true',
-        'smooth-count': '10',
-        'smooth-tolerance': '0.01',
-        'smooth-threshold': '5',
       }
     : {},
 )
