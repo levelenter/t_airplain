@@ -80,6 +80,14 @@ const autoSpinAttr = computed(() => `enabled: ${props.transform.autoRotate}; spe
 
 /** AR.js 画面（a-marker 座標系）でだけ軸のずれを補正する。8th Wall/プレビューでは無回転 */
 const axisCorrectionAttr = computed(() => (isMarkerAr ? '-90 0 0' : '0 0 0'))
+
+/**
+ * a-text に font を指定しない場合、A-Frame（8frame）は既定フォント（roboto）を
+ * https://cdn.aframe.io/fonts/Roboto-msdf.json から取得しようとするため、
+ * CDN 依存を無くすために同じフォントファイル一式を public/scripts/vendor/aframe-fonts/ に
+ * 置いてローカル参照する（取得元は public/scripts/vendor/README.md 参照）。
+ */
+const LABEL_FONT = `${import.meta.env.BASE_URL}scripts/vendor/aframe-fonts/Roboto-msdf.json`
 </script>
 
 <template>
@@ -103,6 +111,7 @@ const axisCorrectionAttr = computed(() => (isMarkerAr ? '-90 0 0' : '0 0 0'))
           align="center"
           color="#ffffff"
           width="2.4"
+          :font="LABEL_FONT"
         ></a-text>
 
         <slot name="hud" />

@@ -6,11 +6,14 @@
  * A-Frame 本体（/scripts/8frame-1.5.0.min.js）はどのみち index.html で先に読み込まれており、
  * このスクリプトは UMD ビルドで window.AFRAME / window.THREE が既にあればそれを使う
  * （require('aframe') は素の <script> 読み込み時には評価されず、window.AFRAME にフォールバックする）。
+ *
+ * CDN（cdn.jsdelivr.net）には依存せず、npm パッケージから取得したファイルを
+ * public/scripts/vendor/@ar-js-org/ar.js@3.4.8/ にそのまま置いてローカル配信する
+ * （取得元・再取得手順は public/scripts/vendor/README.md を参照）。
+ * ローカル配信のため SRI（integrity）や crossOrigin の指定は不要。
  */
 
-const ARJS_SRC =
-  'https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.8/aframe/build/aframe-ar.js'
-const ARJS_INTEGRITY = 'sha384-kMj13PP2WxCked2mWrDVWumIvqdYCYjifhPfsyYBF1av1wP+g7P/hp6kWVGtWrrD'
+const ARJS_SRC = `${import.meta.env.BASE_URL}scripts/vendor/@ar-js-org/ar.js@3.4.8/aframe/build/aframe-ar.js`
 
 let loadPromise: Promise<void> | null = null
 
@@ -35,8 +38,6 @@ export function loadArjs(): Promise<void> {
 
     const script = document.createElement('script')
     script.src = ARJS_SRC
-    script.crossOrigin = 'anonymous'
-    script.integrity = ARJS_INTEGRITY
     script.addEventListener('load', () => resolve(), { once: true })
     script.addEventListener('error', () => reject(new Error('AR.js の読み込みに失敗しました')), { once: true })
     document.head.appendChild(script)

@@ -42,6 +42,15 @@ const panelOpen = ref(false)
 
 const ready = ref(false)
 const loadError = ref<string | null>(null)
+
+/**
+ * AR.js の arjs コンポーネント設定。
+ * cameraParametersUrl を指定しない場合、AR.js は既定のカメラキャリブレーションファイルを
+ * https://ar-js-org.github.io/AR.js/data/data/camera_para.dat から取得しようとするため、
+ * CDN 依存を無くすために public/scripts/vendor/ 配下に同じファイルを置いてローカル参照する
+ * （取得元は public/scripts/vendor/README.md 参照）。
+ */
+const ARJS_CONFIG = `sourceType: webcam; debugUIEnabled: false; detectionMode: mono; cameraParametersUrl: ${import.meta.env.BASE_URL}scripts/vendor/@ar-js-org/ar.js@3.4.8/data/camera_para.dat;`
 const sceneRef = useTemplateRef<HTMLElement>('scene')
 let disposeViewportFit: (() => void) | null = null
 
@@ -156,7 +165,7 @@ function handleTap() {
       v-if="ready"
       ref="scene"
       embedded
-      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono;"
+      :arjs="ARJS_CONFIG"
       vr-mode-ui="enabled: false"
       renderer="colorManagement: true; antialias: true; logarithmicDepthBuffer: true"
     >
