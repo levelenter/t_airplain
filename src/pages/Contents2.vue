@@ -10,6 +10,7 @@ const modelUrl = `${import.meta.env.BASE_URL}3dmodels/model2_t6g_wing_ar.glb`
 
 <template>
   <ArContent :marker-name="markerName" :active="active" :transform="transform" label="T-6G">
+    <!-- 翼断面と気流が1つの GLB のためエフェクトのみ表示の対象外（常に表示） -->
     <a-entity
       :gltf-model="`url(${modelUrl})`"
       :gltf-animation="`clip: Airflow_Loop_4s; enabled: ${active}`"

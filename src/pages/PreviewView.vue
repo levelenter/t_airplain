@@ -10,15 +10,17 @@
  * 座標系は 8th Wall の画像ターゲットに合わせている:
  *   原点 = 画像中心、X = 画像の横方向、Y = 画像の上方向、+Z = 画像の正面（見る側）。
  */
-import { computed, onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import TransformPanel from '@/components/TransformPanel.vue'
+import { useArStore } from '@/stores/ar'
 import { useContentTransformStore } from '@/stores/contentTransform'
 import { registerAdditiveGlow } from '@/utils/aframeAdditiveGlow'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
 import { registerOrbitCamera } from '@/utils/aframeOrbitCamera'
 import {
+  AR_EFFECTS_ONLY_KEY,
   AR_PREVIEW_KEY,
   type ImageTargetMeta,
   loadImageTargetMeta,
@@ -28,6 +30,10 @@ import { MARKERS } from '@/utils/markers'
 import { CONTENT_COMPONENTS } from './contentComponents'
 
 provide(AR_PREVIEW_KEY, true)
+
+// エフェクトのみ表示（機体・エンジンなど物体を隠す）は AR 画面と同じストアの値を使う
+const arStore = useArStore()
+provide(AR_EFFECTS_ONLY_KEY, toRef(arStore, 'effectsOnly'))
 
 const router = useRouter()
 const transformStore = useContentTransformStore()
@@ -136,6 +142,15 @@ function goBack() {
       <label class="preview__check">
         <input v-model="showMarker" type="checkbox">
         マーカー画像
+      </label>
+
+      <label class="preview__check">
+        <input
+          type="checkbox"
+          :checked="arStore.effectsOnly"
+          @change="arStore.setEffectsOnly(($event.target as HTMLInputElement).checked)"
+        >
+        エフェクトのみ
       </label>
 
       <button class="preview__button" type="button" @click="cameraKey++">視点リセット</button>

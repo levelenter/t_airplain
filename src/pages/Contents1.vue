@@ -11,11 +11,17 @@ const airflowUrl = `${import.meta.env.BASE_URL}3dmodels/model1_t1b_airflow_glow.
 
 <template>
   <ArContent :marker-name="markerName" :active="active" :transform="transform" label="T-1B / AIR INTAKE">
-    <a-entity :gltf-model="`url(${noseUrl})`"></a-entity>
-    <a-entity
-      :gltf-model="`url(${airflowUrl})`"
-      :gltf-animation="`clip: Intake_Glow_Loop_4s; enabled: ${active}`"
-      additive-glow
-    ></a-entity>
+    <template #default="{ airframeVisible }">
+      <!-- 機体（additive-glow 無し）はエフェクトのみ表示の間隠す -->
+      <a-entity
+        :gltf-model="`url(${noseUrl})`"
+        :visible="airframeVisible ? 'true' : 'false'"
+      ></a-entity>
+      <a-entity
+        :gltf-model="`url(${airflowUrl})`"
+        :gltf-animation="`clip: Intake_Glow_Loop_4s; enabled: ${active}`"
+        additive-glow
+      ></a-entity>
+    </template>
   </ArContent>
 </template>

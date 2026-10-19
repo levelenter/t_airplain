@@ -29,15 +29,19 @@ const PANEL_BODY =
 
 <template>
   <ArContent :marker-name="markerName" :active="active" :transform="transform" label="V-44 / TANDEM ROTORS" label-position="0 0.7 0.35">
-    <a-entity
-      :gltf-model="`url(${airframeUrl})`"
-      :gltf-animation="`clip: V44_CounterRotation_Loop_4s; enabled: ${active}`"
-    ></a-entity>
-    <a-entity
-      :gltf-model="`url(${downwashUrl})`"
-      :gltf-animation="`clip: V44_Downwash_Glow_Loop_4s; enabled: ${active}`"
-      additive-glow
-    ></a-entity>
+    <template #default="{ airframeVisible }">
+      <!-- 機体（additive-glow 無し）はエフェクトのみ表示の間隠す -->
+      <a-entity
+        :gltf-model="`url(${airframeUrl})`"
+        :gltf-animation="`clip: V44_CounterRotation_Loop_4s; enabled: ${active}`"
+        :visible="airframeVisible ? 'true' : 'false'"
+      ></a-entity>
+      <a-entity
+        :gltf-model="`url(${downwashUrl})`"
+        :gltf-animation="`clip: V44_Downwash_Glow_Loop_4s; enabled: ${active}`"
+        additive-glow
+      ></a-entity>
+    </template>
 
     <template #hud>
       <ExplanationPanel3D

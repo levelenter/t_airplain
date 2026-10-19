@@ -33,3 +33,12 @@ GUI で作成したい場合は 8th Wall Desktop アプリ（https://8thwall.org
 元画像を差し替えた場合は、上記 CLI で再生成してこのディレクトリを更新してください。
 
 - `marker7_wind.png` → `marker_7`（風エフェクト実験用の専用図形マーカー）
+
+## 画像番号マーカー（number_01〜number_06）
+
+`/image-number-ar` 画面（`src/utils/imageNumberMarkers.ts`）で使う、番号入りの 3:4 縦マーカーです。
+
+- 生成元: `public/marker/ar_image_number/0N.png`（1200x1600。`node scripts/generate-image-number-markers.mjs` で生成）
+- 変換: `bash scripts/generate-image-number-targets.sh`（CLI を非対話で実行し `number_0N.json` ほか一式を出力）
+- 元画像を作り直した場合は、上記 2 つを順に再実行してください。
+

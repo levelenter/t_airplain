@@ -1,0 +1,23 @@
+{
+  "imagePath": "image-targets/number_06_luminance.png",
+  "metadata": null,
+  "name": "number_06",
+  "type": "PLANAR",
+  "properties": {
+    "left": 0,
+    "top": 0,
+    "width": 1200,
+    "height": 1600,
+    "isRotated": false,
+    "originalWidth": 1200,
+    "originalHeight": 1600
+  },
+  "resources": {
+    "originalImage": "number_06_original.png",
+    "croppedImage": "number_06_cropped.png",
+    "thumbnailImage": "number_06_thumbnail.png",
+    "luminanceImage": "number_06_luminance.png"
+  },
+  "created": 1792376453008,
+  "updated": 1792376453008
+}

@@ -20,6 +20,12 @@ function openPreview() {
   router.push({ name: 'preview' })
 }
 
+/** 画像番号マーカー（number_01〜06）を 8th Wall で認識する画面へ */
+function openImageNumberAr() {
+  unlockAudio()
+  router.push({ name: 'image-number-ar', query: debugQuery.value })
+}
+
 /** 番号入りマーカー（01〜06）を AR.js で認識する画面へ */
 function openMarkerAr() {
   unlockAudio()
@@ -39,6 +45,7 @@ function openMarkerAr() {
 
       <div class="start__actions">
         <button class="start__button" type="button" @click="start">画像マーカーでスタート</button>
+        <button class="start__button" type="button" @click="openImageNumberAr">画像番号マーカーでスタート</button>
         <button class="start__button" type="button" @click="openMarkerAr">番号マーカーでスタート</button>
       </div>
 
@@ -95,12 +102,13 @@ function openMarkerAr() {
 .start__actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
   justify-content: center;
   margin: 24px 0;
 }
 
 .start__button {
-  flex: 1;
+  flex: 1 1 100%;
   padding: 14px 12px;
   font-size: 1rem;
   font-weight: bold;

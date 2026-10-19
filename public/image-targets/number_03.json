@@ -1,0 +1,23 @@
+{
+  "imagePath": "image-targets/number_03_luminance.png",
+  "metadata": null,
+  "name": "number_03",
+  "type": "PLANAR",
+  "properties": {
+    "left": 0,
+    "top": 0,
+    "width": 1200,
+    "height": 1600,
+    "isRotated": false,
+    "originalWidth": 1200,
+    "originalHeight": 1600
+  },
+  "resources": {
+    "originalImage": "number_03_original.png",
+    "croppedImage": "number_03_cropped.png",
+    "thumbnailImage": "number_03_thumbnail.png",
+    "luminanceImage": "number_03_luminance.png"
+  },
+  "created": 1792376450278,
+  "updated": 1792376450278
+}

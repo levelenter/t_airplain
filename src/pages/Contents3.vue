@@ -14,19 +14,23 @@ const afterburnerUrl = `${import.meta.env.BASE_URL}3dmodels/model3_jet_afterburn
 
 <template>
   <ArContent :marker-name="markerName" :active="active" :transform="transform" label="Jet Engine">
-    <a-entity
-      :gltf-model="`url(${engineUrl})`"
-      :gltf-animation="`clip: Jet_Airflow_Loop_4s; enabled: ${active}`"
-    ></a-entity>
-    <a-entity
-      :gltf-model="`url(${intakeUrl})`"
-      :gltf-animation="`clip: Jet_Intake_Glow_Loop_4s; enabled: ${active}`"
-      additive-glow
-    ></a-entity>
-    <a-entity
-      :gltf-model="`url(${afterburnerUrl})`"
-      :gltf-animation="`clip: Jet_Afterburner_Glow_Loop_05s; enabled: ${active}`"
-      additive-glow
-    ></a-entity>
+    <template #default="{ airframeVisible }">
+      <!-- エンジン（additive-glow 無し）はエフェクトのみ表示の間隠す -->
+      <a-entity
+        :gltf-model="`url(${engineUrl})`"
+        :gltf-animation="`clip: Jet_Airflow_Loop_4s; enabled: ${active}`"
+        :visible="airframeVisible ? 'true' : 'false'"
+      ></a-entity>
+      <a-entity
+        :gltf-model="`url(${intakeUrl})`"
+        :gltf-animation="`clip: Jet_Intake_Glow_Loop_4s; enabled: ${active}`"
+        additive-glow
+      ></a-entity>
+      <a-entity
+        :gltf-model="`url(${afterburnerUrl})`"
+        :gltf-animation="`clip: Jet_Afterburner_Glow_Loop_05s; enabled: ${active}`"
+        additive-glow
+      ></a-entity>
+    </template>
   </ArContent>
 </template>

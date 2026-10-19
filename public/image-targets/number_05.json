@@ -1,0 +1,23 @@
+{
+  "imagePath": "image-targets/number_05_luminance.png",
+  "metadata": null,
+  "name": "number_05",
+  "type": "PLANAR",
+  "properties": {
+    "left": 0,
+    "top": 0,
+    "width": 1200,
+    "height": 1600,
+    "isRotated": false,
+    "originalWidth": 1200,
+    "originalHeight": 1600
+  },
+  "resources": {
+    "originalImage": "number_05_original.png",
+    "croppedImage": "number_05_cropped.png",
+    "thumbnailImage": "number_05_thumbnail.png",
+    "luminanceImage": "number_05_luminance.png"
+  },
+  "created": 1792376452045,
+  "updated": 1792376452045
+}

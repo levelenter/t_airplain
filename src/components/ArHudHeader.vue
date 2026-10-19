@@ -12,9 +12,11 @@ defineProps<{
   isDebug: boolean
   /** 調整パネルが開いているか（開いている間はボタンを隠す） */
   panelOpen: boolean
+  /** エフェクトのみ表示中か（機体・エンジンなど物体を隠している） */
+  effectsOnly: boolean
 }>()
 
-defineEmits<{ back: []; 'open-panel': [] }>()
+defineEmits<{ back: []; 'open-panel': []; 'toggle-effects-only': [] }>()
 </script>
 
 <template>
@@ -22,6 +24,17 @@ defineEmits<{ back: []; 'open-panel': [] }>()
     <button class="ar-hud__back" type="button" @click="$emit('back')">← メニュー</button>
     <p v-if="activeTitle" class="ar-hud__label">{{ activeTitle }}</p>
     <p v-else class="ar-hud__label ar-hud__label--hint">{{ hintText }}</p>
+
+    <!-- エフェクトのみ表示のトグル（debug 不要で常時表示） -->
+    <button
+      class="ar-hud__effects"
+      :class="{ 'ar-hud__effects--on': effectsOnly }"
+      type="button"
+      :aria-pressed="effectsOnly"
+      @click="$emit('toggle-effects-only')"
+    >
+      {{ effectsOnly ? '機体を表示' : 'エフェクトのみ' }}
+    </button>
 
     <button
       v-if="isDebug && !panelOpen"
@@ -75,10 +88,28 @@ defineEmits<{ back: []; 'open-panel': [] }>()
   background: rgb(0 0 0 / 55%);
 }
 
+/* エフェクトのみ表示のトグルボタン。ON の間は黄色で状態を示す */
+.ar-hud__effects {
+  pointer-events: auto;
+  margin-left: auto;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  color: #0b1e3f;
+  font-weight: bold;
+  background: rgb(255 255 255 / 85%);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ar-hud__effects--on {
+  background: rgb(255 213 79 / 92%);
+  color: #0b1e3f;
+}
+
 /* デバッグ時のみ HUD に出る調整パネルの開閉ボタン */
 .ar-hud__debug-open {
   pointer-events: auto;
-  margin-left: auto;
   padding: 8px 14px;
   font-size: 0.8rem;
   color: #0b1e3f;

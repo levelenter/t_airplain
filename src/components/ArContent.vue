@@ -16,6 +16,9 @@
  *             └ slot「hud」               解説パネルなど。モデルの位置調整の影響を受けない
  *                                         独立した層に置き、各 ContentsN.vue 側の定数で調整する
  *
+ * slot には airframeVisible（エフェクトのみ表示の間は false）を渡す。
+ * 各 ContentsN.vue が機体側 entity（additive-glow の無い物体）の visible に使う。
+ *
  * axis-correction（AR.js 版だけ rotation="-90 0 0"）について:
  * ContentsN.vue は 8th Wall の画像ターゲット座標系（画像平面が XY、+Y が画像の上、
  * +Z が画像から外向き＝カメラ側）を前提に position/rotation/label/hud を調整している。
@@ -26,8 +29,8 @@
  * コンテンツの +Z（画像から外向き）→ マーカー座標の +Y（マーカーから外向き）に写す。
  * 結果として、壁に垂直に貼ったマーカーでも機体は正立し、+Y が壁の外向き（手前）を向く。
  */
-import { computed, inject } from 'vue'
-import { AR_MARKER_AR_KEY, AR_PREVIEW_KEY } from '@/utils/arPreview'
+import { computed, inject, ref } from 'vue'
+import { AR_EFFECTS_ONLY_KEY, AR_MARKER_AR_KEY, AR_PREVIEW_KEY } from '@/utils/arPreview'
 import { type ContentTransform, toScaleAttr, toVec3Attr } from '@/utils/contentTransform'
 import { markerArPatternUrl } from '@/utils/markerAr'
 
@@ -48,6 +51,10 @@ const props = defineProps<{
  */
 const isPreview = inject(AR_PREVIEW_KEY, false)
 const isMarkerAr = inject(AR_MARKER_AR_KEY, false)
+/** エフェクトのみ表示中か（provide が無ければ常に false） */
+const effectsOnly = inject(AR_EFFECTS_ONLY_KEY, ref(false))
+/** 機体・エンジンなど物体 entity を表示してよいか */
+const airframeVisible = computed(() => !effectsOnly.value)
 const rootTag = computed(() => {
   if (isMarkerAr) return 'a-marker'
   return isPreview ? 'a-entity' : 'xrextras-named-image-target'
@@ -100,7 +107,7 @@ const LABEL_FONT = `${import.meta.env.BASE_URL}scripts/vendor/aframe-fonts/Robot
       <a-entity :rotation="axisCorrectionAttr">
         <a-entity :position="positionAttr" :rotation="rotationAttr" :scale="scaleAttr">
           <a-entity :auto-spin="autoSpinAttr">
-            <slot />
+            <slot :airframe-visible="airframeVisible" />
           </a-entity>
         </a-entity>
 

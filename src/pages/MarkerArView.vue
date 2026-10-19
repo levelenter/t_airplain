@@ -8,7 +8,7 @@
  * ArContentExplanations/ArDebugPanel）・音（sound.ts）はそのまま再利用し、AR.js 固有なのは
  * a-scene の arjs/a-marker まわりの設定と markerFound/markerLost のイベント購読だけにする。
  */
-import { computed, onBeforeUnmount, onMounted, provide, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, provide, ref, toRef, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import ArContentExplanations from '@/components/ArContentExplanations.vue'
 import ArDebugPanel from '@/components/ArDebugPanel.vue'
@@ -23,7 +23,7 @@ import { useContentTransformStore } from '@/stores/contentTransform'
 import { registerAdditiveGlow } from '@/utils/aframeAdditiveGlow'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
-import { AR_MARKER_AR_KEY } from '@/utils/arPreview'
+import { AR_EFFECTS_ONLY_KEY, AR_MARKER_AR_KEY } from '@/utils/arPreview'
 import { setupArjsViewportFit } from '@/utils/arjsViewportFit'
 import { loadArjs } from '@/utils/loadArjs'
 import { MARKER_AR_MARKERS } from '@/utils/markerAr'
@@ -34,6 +34,7 @@ provide(AR_MARKER_AR_KEY, true)
 
 const router = useRouter()
 const arStore = useArStore()
+provide(AR_EFFECTS_ONLY_KEY, toRef(arStore, 'effectsOnly'))
 const transformStore = useContentTransformStore()
 const isDebug = useDebugMode()
 
@@ -204,6 +205,8 @@ function handleTap() {
 
     <ArHudHeader
       :active-title="arStore.activeMarker?.title ?? null"
+      :effects-only="arStore.effectsOnly"
+      @toggle-effects-only="arStore.toggleEffectsOnly()"
       hint-text="番号マーカー（01〜06）を探してかざしてください"
       :is-debug="isDebug"
       :panel-open="panelOpen"

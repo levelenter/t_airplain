@@ -16,6 +16,13 @@ const router = createRouter({
       component: () => import('@/pages/CameraView.vue'),
     },
     {
+      path: '/image-number-ar',
+      name: 'image-number-ar',
+      // 8th Wall で画像番号マーカー（number_01〜06）を認識する。CameraView をマーカーセット違いで再利用
+      component: () => import('@/pages/CameraView.vue'),
+      props: { markerSet: 'imageNumber' },
+    },
+    {
       path: '/preview',
       name: 'preview',
       // PC でマーカー上の AR コンテンツを確認するローカルプレビュー（カメラ・XR8 不要）

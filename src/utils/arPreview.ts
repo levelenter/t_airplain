@@ -1,4 +1,4 @@
-import type { InjectionKey } from 'vue'
+import type { InjectionKey, Ref } from 'vue'
 
 /**
  * 開発用プレビュー中かどうかを ArContent に伝える provide/inject キー。
@@ -12,6 +12,13 @@ export const AR_PREVIEW_KEY: InjectionKey<boolean> = Symbol('arPreview')
  * `<a-marker type="pattern">`（src/utils/markerAr.ts の .patt を参照）に差し替える。
  */
 export const AR_MARKER_AR_KEY: InjectionKey<boolean> = Symbol('arMarkerAr')
+
+/**
+ * 「エフェクトのみ表示」中かどうかを ArContent に伝える provide/inject キー。
+ * CameraView / MarkerArView / PreviewView が useArStore().effectsOnly を provide し、
+ * ArContent は機体側 entity を隠すための airframeVisible を slot に渡す。
+ */
+export const AR_EFFECTS_ONLY_KEY: InjectionKey<Readonly<Ref<boolean>>> = Symbol('arEffectsOnly')
 
 /** image-target-cli が生成する JSON のうち、プレビューで使う部分 */
 export interface ImageTargetMeta {

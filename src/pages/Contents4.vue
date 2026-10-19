@@ -16,6 +16,9 @@ const modelUrl = `${import.meta.env.BASE_URL}3dmodels/model4_C1_set.glb`
     :transform="transform"
     label="Kawasaki C-1"
   >
-    <a-entity :gltf-model="`url(${modelUrl})`"></a-entity>
+    <!-- エフェクト無しのため、エフェクトのみ表示中は何も映らない（空になる） -->
+    <template #default="{ airframeVisible }">
+      <a-entity :gltf-model="`url(${modelUrl})`" :visible="airframeVisible ? 'true' : 'false'"></a-entity>
+    </template>
   </ArContent>
 </template>

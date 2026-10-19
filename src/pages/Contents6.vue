@@ -10,14 +10,18 @@ const airflowUrl = `${import.meta.env.BASE_URL}3dmodels/model6_h19_airflow_glow.
 
 <template>
   <ArContent :marker-name="markerName" :active="active" :transform="transform" label="H-19 / ANTI-TORQUE">
-    <a-entity
-      :gltf-model="`url(${airframeUrl})`"
-      :gltf-animation="`clip: H19_AntiTorque_Loop_4s; enabled: ${active}`"
-    ></a-entity>
-    <a-entity
-      :gltf-model="`url(${airflowUrl})`"
-      :gltf-animation="`clip: H19_Airflow_Glow_Loop_4s; enabled: ${active}`"
-      additive-glow
-    ></a-entity>
+    <template #default="{ airframeVisible }">
+      <!-- 機体（additive-glow 無し）はエフェクトのみ表示の間隠す -->
+      <a-entity
+        :gltf-model="`url(${airframeUrl})`"
+        :gltf-animation="`clip: H19_AntiTorque_Loop_4s; enabled: ${active}`"
+        :visible="airframeVisible ? 'true' : 'false'"
+      ></a-entity>
+      <a-entity
+        :gltf-model="`url(${airflowUrl})`"
+        :gltf-animation="`clip: H19_Airflow_Glow_Loop_4s; enabled: ${active}`"
+        additive-glow
+      ></a-entity>
+    </template>
   </ArContent>
 </template>

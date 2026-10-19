@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, provide, ref, toRef, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import ArContentExplanations from '@/components/ArContentExplanations.vue'
 import ArDebugPanel from '@/components/ArDebugPanel.vue'
@@ -11,14 +11,24 @@ import { useContentTransformStore } from '@/stores/contentTransform'
 import { registerAutoSpin } from '@/utils/aframeAutoSpin'
 import { registerGltfAnimation } from '@/utils/aframeGltfAnimation'
 import { registerAdditiveGlow } from '@/utils/aframeAdditiveGlow'
+import { AR_EFFECTS_ONLY_KEY } from '@/utils/arPreview'
 import { localize8thWallUi } from '@/utils/localize8thWallUi'
+import { IMAGE_NUMBER_MARKERS } from '@/utils/imageNumberMarkers'
 import { AR_MARKERS } from '@/utils/markers'
 import { playFoundSound, playTapSound } from '@/utils/sound'
 import { configureImageTargets, stopXR8 } from '@/utils/xr8'
 import { CONTENT_COMPONENTS } from './contentComponents'
 
+/** 使うマーカーセット。'image' は写真マーカー（既定）、'imageNumber' は画像番号マーカー */
+const props = withDefaults(defineProps<{ markerSet?: 'image' | 'imageNumber' }>(), { markerSet: 'image' })
+const markers = computed(() => (props.markerSet === 'imageNumber' ? IMAGE_NUMBER_MARKERS : AR_MARKERS))
+const hintText = computed(() =>
+  props.markerSet === 'imageNumber' ? '番号マーカーを探してかざしてください' : '画像マーカーを探してかざしてください',
+)
+
 const router = useRouter()
 const arStore = useArStore()
+provide(AR_EFFECTS_ONLY_KEY, toRef(arStore, 'effectsOnly'))
 const transformStore = useContentTransformStore()
 const isDebug = useDebugMode()
 
@@ -70,11 +80,11 @@ let stopLocalize: (() => void) | null = null
 
 onMounted(async () => {
   arStore.reset()
-  // 番号マーカー画面（/marker-ar）から遷移してきた場合に備え、マーカー定義を画像マーカーに戻す
-  arStore.setMarkerSource(AR_MARKERS)
+  // 他のマーカー画面から遷移してきた場合に備え、マーカー定義をこの画面のセットに合わせる
+  arStore.setMarkerSource(markers.value)
   // 許可ダイアログより先に監視を始める
   stopLocalize = localize8thWallUi()
-  arStore.loadedMarkerNames = await configureImageTargets(AR_MARKERS.map((m) => m.name))
+  arStore.loadedMarkerNames = await configureImageTargets(markers.value.map((m) => m.name))
 
   configureLandingPage()
   // 自動回転コンポーネントは a-scene 生成前に登録しておく必要がある
@@ -150,7 +160,7 @@ function handleTap() {
 
       <component
         :is="CONTENT_COMPONENTS[marker.contentId]"
-        v-for="marker in AR_MARKERS"
+        v-for="marker in markers"
         :key="marker.name"
         :marker-name="marker.name"
         :active="arStore.isActivated(marker.name)"
@@ -178,7 +188,9 @@ function handleTap() {
     <!-- HTML オーバーレイ（HUD）: A-Frame のテキストは日本語グリフ非対応のため、日本語表示はここで行う -->
     <ArHudHeader
       :active-title="arStore.activeMarker?.title ?? null"
-      hint-text="画像マーカーを探してかざしてください"
+      :effects-only="arStore.effectsOnly"
+      @toggle-effects-only="arStore.toggleEffectsOnly()"
+      :hint-text="hintText"
       :is-debug="isDebug"
       :panel-open="panelOpen"
       @back="goBack"

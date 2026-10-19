@@ -19,6 +19,8 @@ export const useArStore = defineStore('ar', () => {
   const loadedMarkerNames = ref<string[]>([])
   /** タップ済みでコンテンツを表示してよいマーカー名 */
   const activatedMarkerNames = ref<Set<string>>(new Set())
+  /** エフェクトのみ表示（機体・エンジンなど物体 entity を隠す）。画面をまたいで保持する */
+  const effectsOnly = ref(false)
   /** 現在の画面が使うマーカー定義一覧。既定は 8th Wall の画像マーカー */
   const markerSource = ref<MarkerDefinition[]>(AR_MARKERS)
 
@@ -71,6 +73,17 @@ export const useArStore = defineStore('ar', () => {
     visibleMarkerNames.value = next
   }
 
+  /** エフェクトのみ表示を反転する */
+  function toggleEffectsOnly() {
+    effectsOnly.value = !effectsOnly.value
+  }
+
+  /** エフェクトのみ表示を明示的に設定する */
+  function setEffectsOnly(value: boolean) {
+    effectsOnly.value = value
+  }
+
+  // reset() では effectsOnly をリセットしない（表示設定は画面をまたいで保持）
   function reset() {
     visibleMarkerNames.value = new Set()
     lastFoundName.value = null
@@ -83,6 +96,9 @@ export const useArStore = defineStore('ar', () => {
     loadedMarkerNames,
     activatedMarkerNames,
     markerSource,
+    effectsOnly,
+    toggleEffectsOnly,
+    setEffectsOnly,
     setMarkerSource,
     activeMarker,
     pendingMarker,
