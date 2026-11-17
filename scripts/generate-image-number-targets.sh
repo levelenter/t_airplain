@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 画像番号マーカー（public/marker/ar_image_number/01.png〜06.png）から、
 # 8th Wall の Image Target 一式を生成して public/image-targets/ に出力するスクリプト。
-# ターゲット名は number_01〜number_06（AR.js 版の marker_01 などと衝突させない）。
+# ターゲット名は number_01〜number_06。
 #
 # 使い方:
 #   1. 先に `node scripts/generate-image-number-markers.mjs` でマーカー画像を生成しておく

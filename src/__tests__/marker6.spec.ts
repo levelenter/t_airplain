@@ -15,9 +15,9 @@ describe('new Marker6 integration', () => {
   it('registers a distinct image target with resolvable generated resources', () => {
     expect(MARKERS.length).toBeGreaterThanOrEqual(6)
     expect(new Set(MARKERS.map((m) => m.name)).size).toBe(MARKERS.length)
-    const marker = findMarkerByName('marker_6')!
+    const marker = findMarkerByName('number_06')!
     expect(marker.contentId).toBe(6)
-    const target = JSON.parse(readFileSync(asset('image-targets/marker_6.json'), 'utf8'))
+    const target = JSON.parse(readFileSync(asset('image-targets/number_06.json'), 'utf8'))
     expect(target.name).toBe(marker.name)
     expect(target.type).toBe('PLANAR')
     expect(existsSync(asset(target.imagePath))).toBe(true)
@@ -28,16 +28,16 @@ describe('new Marker6 integration', () => {
 
   it('recognizes, activates and loses Marker6 without activating Marker5', () => {
     const ar = useArStore()
-    ar.onImageFound('marker_6')
+    ar.onImageFound('number_06')
     expect(ar.pendingMarker?.contentId).toBe(6)
-    expect(ar.isActivated('marker_6')).toBe(false)
-    ar.activate('marker_6')
+    expect(ar.isActivated('number_06')).toBe(false)
+    ar.activate('number_06')
     expect(ar.pendingMarker).toBeNull()
-    expect(ar.isActivated('marker_5')).toBe(false)
-    ar.onImageLost('marker_6')
-    expect(ar.visibleMarkerNames.has('marker_6')).toBe(false)
-    ar.onImageFound('marker_6')
-    expect(ar.isActivated('marker_6')).toBe(true)
+    expect(ar.isActivated('number_05')).toBe(false)
+    ar.onImageLost('number_06')
+    expect(ar.visibleMarkerNames.has('number_06')).toBe(false)
+    ar.onImageFound('number_06')
+    expect(ar.isActivated('number_06')).toBe(true)
   })
 
   it('adjusts and exports Marker6 independently and uses the shipped animation clip', () => {

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 /**
  * 中央の照準（レティクル）。カメラ映像を隠さないよう細線＋部分的なブラケットのみで構成する。
- * CameraView（8th Wall）と MarkerArView（AR.js）の両方から使う共通パーツ。
  *
  * state:
  * - idle:  マーカーを探している最中
@@ -175,5 +174,17 @@ defineProps<{ state: 'idle' | 'found' | 'dim' }>()
   .reticle__prompt {
     animation: none !important;
   }
+}
+
+/* 横向きモード: 高さ基準で収め、照準下のテキストが画面外にはみ出さないようにする */
+html[data-layout='landscape'] .reticle__scope {
+  width: min(52vh, 240px);
+  width: min(52dvh, 240px);
+}
+
+html[data-layout='landscape'] .reticle__prompt {
+  top: calc(100% + 8px);
+  padding: 6px 14px;
+  font-size: 0.8rem;
 }
 </style>

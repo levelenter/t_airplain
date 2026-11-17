@@ -36,4 +36,17 @@ p:last-child { margin-bottom: 0; }
 summary { padding: 6px 0; cursor: pointer; }
 summary:focus-visible { outline: 2px solid #81dfff; outline-offset: 2px; }
 .tail-explanation__note { color: #c1d3df; font-size: 0.75rem; }
+
+/* 横向きモード: 下の帯ではなく右側の縦長パネルにして、中央の照準と 3D モデルを隠さない */
+html[data-layout='landscape'] .tail-explanation {
+  top: calc(env(safe-area-inset-top, 0px) + 56px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  bottom: auto;
+  left: auto;
+  width: min(38vw, 360px);
+  max-width: none;
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 68px);
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 68px);
+  box-sizing: border-box;
+}
 </style>

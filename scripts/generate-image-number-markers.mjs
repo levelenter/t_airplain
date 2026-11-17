@@ -2,7 +2,6 @@
 /**
  * 8th Wall の Image Target 用に、数字マーカー画像 6 枚（01〜06）を生成するスクリプト。
  * 出力: public/marker/ar_image_number/01.png 〜 06.png（1200x1600 の 3:4 縦、RGB、白背景）
- * （public/marker/01.png などは AR.js 用なので触らない）
  *
  * デザイン:
  *  - 3:4 縦なので 8th Wall CLI の既定クロップ（3:4 中央領域）で黒枠が切れない。
@@ -14,7 +13,7 @@
  *    seed は数字ごとに異なり、装飾も毎枚異なる。
  *
  * 実行にはブラウザの Canvas 2D が必要なため、Playwright で Chromium を起動する
- * （generate-ar-patterns.mjs と同じ方式。devDependencies の @playwright/test を使う）。
+ * （devDependencies の @playwright/test を使う）。
  *
  * 使い方: `node scripts/generate-image-number-markers.mjs`
  */

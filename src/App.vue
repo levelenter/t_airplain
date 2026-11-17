@@ -1,4 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { watchEffect } from 'vue'
+import { useLayoutMode } from '@/composables/useLayoutMode'
+
+// 画面の向きモードを html 要素へ反映し、各コンポーネントの CSS から参照できるようにする
+const { layoutMode } = useLayoutMode()
+watchEffect(() => {
+  document.documentElement.dataset.layout = layoutMode.value
+})
+</script>
 
 <template>
   <RouterView />

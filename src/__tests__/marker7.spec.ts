@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
@@ -8,29 +8,20 @@ import { useArStore } from '../stores/ar'
 import { useContentTransformStore } from '../stores/contentTransform'
 
 it('keeps Marker7 out of the AR marker set but available to the developer preview', () => {
-  expect(MARKERS.find((marker) => marker.name === 'marker_7')?.previewOnly).toBe(true)
-  expect(AR_MARKERS.map((marker) => marker.name)).not.toContain('marker_7')
+  expect(MARKERS.find((marker) => marker.contentId === 7)?.previewOnly).toBe(true)
+  expect(AR_MARKERS.map((marker) => marker.name)).not.toContain('preview_07')
   expect(AR_MARKERS.map((marker) => marker.contentId)).toEqual([1, 2, 3, 4, 5, 6])
 })
 
-it('registers the independent wind study, target resources and adjustable placement', () => {
+it('registers the independent wind study and adjustable placement', () => {
   setActivePinia(createPinia())
   expect(MARKERS.map((marker) => marker.contentId)).toEqual([...CONTENT_IDS])
-  const target = JSON.parse(readFileSync(resolve('public/image-targets/marker_7.json'), 'utf8'))
-  expect(target.name).toBe('marker_7')
-  expect(existsSync(resolve('public', target.imagePath))).toBe(true)
-  for (const resource of Object.values(target.resources)) {
-    expect(existsSync(resolve('public/image-targets', String(resource)))).toBe(true)
-  }
   const ar = useArStore()
-  // marker_7 は previewOnly のため既定の markerSource（AR_MARKERS）には含まれない。
-  // ここではプレビュー用途を想定し、全マーカー一覧に差し替えてから解決させる。
-  ar.setMarkerSource(MARKERS)
-  ar.onImageFound('marker_7')
+  ar.onImageFound('preview_07')
   expect(ar.pendingMarker?.contentId).toBe(7)
-  ar.activate('marker_7')
+  ar.activate('preview_07')
   expect(ar.pendingMarker).toBeNull()
-  expect(ar.isActivated('marker_6')).toBe(false)
+  expect(ar.isActivated('number_06')).toBe(false)
   const transforms = useContentTransformStore()
   transforms.update(7, { scale: 0.3 })
   expect(JSON.parse(transforms.json)['7'].scale).toBe(0.3)

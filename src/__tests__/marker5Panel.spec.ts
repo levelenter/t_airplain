@@ -7,7 +7,7 @@ describe('Marker5 explanation panel', () => {
   it('renders the panel as an entity separate from the airframe/glow models', () => {
     const wrapper = mount(Contents5, {
       props: {
-        markerName: 'marker_5',
+        markerName: 'number_05',
         active: true,
         transform: defaultTransform(5),
       },
@@ -38,7 +38,7 @@ describe('Marker5 explanation panel', () => {
   it('draws the panel title, subheading and body into the canvas texture', () => {
     const wrapper = mount(Contents5, {
       props: {
-        markerName: 'marker_5',
+        markerName: 'number_05',
         active: true,
         transform: defaultTransform(5),
       },

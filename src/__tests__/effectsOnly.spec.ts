@@ -26,7 +26,7 @@ describe('useArStore effectsOnly', () => {
 describe('ArContent airframeVisible', () => {
   const mountWith = (provide: Record<symbol, unknown>) =>
     mount(ArContent, {
-      props: { markerName: 'marker_1', active: true, transform: defaultTransform(1), label: '' },
+      props: { markerName: 'number_01', active: true, transform: defaultTransform(1), label: '' },
       slots: {
         default: (props: { airframeVisible: boolean }) =>
           h('a-entity', { class: 'model-stub', visible: props.airframeVisible ? 'true' : 'false' }),
@@ -48,7 +48,7 @@ describe('ArContent airframeVisible', () => {
 describe('Contents3 エフェクトのみ表示', () => {
   it('エンジン entity だけ隠し、グロー entity には visible を付けない', () => {
     const wrapper = mount(Contents3, {
-      props: { markerName: 'marker_3', active: true, transform: defaultTransform(3) },
+      props: { markerName: 'number_03', active: true, transform: defaultTransform(3) },
       global: { provide: { [AR_EFFECTS_ONLY_KEY]: ref(true) } },
     })
     const models = wrapper.findAll('a-entity[gltf-model]')

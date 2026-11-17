@@ -1,9 +1,8 @@
 <script setup lang="ts">
 /**
  * 画面上部の HUD ヘッダー（戻るボタン＋現在のマーカー名＋調整パネル開閉ボタン）。
- * CameraView（8th Wall）と MarkerArView（AR.js）で共通の見た目・挙動にする。
  */
-defineProps<{
+withDefaults(defineProps<{
   /** 認識中マーカーの日本語タイトル。null ならヒントテキストを出す */
   activeTitle: string | null
   /** マーカー未認識時に出すヒントテキスト */
@@ -14,7 +13,9 @@ defineProps<{
   panelOpen: boolean
   /** エフェクトのみ表示中か（機体・エンジンなど物体を隠している） */
   effectsOnly: boolean
-}>()
+  /** 「エフェクトのみ」トグルを描画するか（エフェクトの無いコンテンツでは false） */
+  showEffectsToggle?: boolean
+}>(), { showEffectsToggle: true })
 
 defineEmits<{ back: []; 'open-panel': []; 'toggle-effects-only': [] }>()
 </script>
@@ -27,6 +28,7 @@ defineEmits<{ back: []; 'open-panel': []; 'toggle-effects-only': [] }>()
 
     <!-- エフェクトのみ表示のトグル（debug 不要で常時表示） -->
     <button
+      v-if="showEffectsToggle"
       class="ar-hud__effects"
       :class="{ 'ar-hud__effects--on': effectsOnly }"
       type="button"
@@ -118,5 +120,11 @@ defineEmits<{ back: []; 'open-panel': []; 'toggle-effects-only': [] }>()
   border: none;
   border-radius: 999px;
   cursor: pointer;
+}
+
+/* 横向きモード: 左右のセーフエリア（ノッチ）を避け、高さが低いので上下を詰める */
+html[data-layout='landscape'] .ar-hud {
+  padding: calc(env(safe-area-inset-top, 0px) + 6px) calc(env(safe-area-inset-right, 0px) + 12px) 6px
+    calc(env(safe-area-inset-left, 0px) + 12px);
 }
 </style>

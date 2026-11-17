@@ -2,7 +2,6 @@
 /**
  * ?debug=true のときだけ出る配置調整パネル（TransformPanel）の出し分け。
  * 認識中のマーカーに合わせて対象を切り替え、未認識時はヒントを出す。
- * CameraView（8th Wall）と MarkerArView（AR.js）で共通に使う。
  */
 import TransformPanel from '@/components/TransformPanel.vue'
 import type { ContentId } from '@/utils/contentTransform'
@@ -60,5 +59,12 @@ defineEmits<{ close: [] }>()
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+/* 横向きモード: 左側に寄せ、中央の照準を覆わないようにする */
+html[data-layout='landscape'] .ar-debug-hint {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  transform: none;
 }
 </style>
